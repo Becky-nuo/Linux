@@ -1,0 +1,111 @@
+Web系统安全与动态接口管理
+    Apache-Http
+        软件包: httpd
+        全局配置文件: /e/ttptdconf/httpd.conf
+        欢迎页目录: /etc/httpd/conf.d/welcome.conf
+        网页默认目录: /var/www/html
+        
+        任务一:
+            使用http发布yum安装源
+            新建http安装源目录：mkdir /var/www/htm/cdrom
+            将光盘mount到此目录:mount /dev/cdrom /var/www/htm/cdrom
+            
+            测试:
+                打开网页: http://192.168.0.66/cdrom
+            
+            步骤:
+                1.安装软件包：
+                    yum install httpd -y
+                    systemctl start httpd
+                    systemclt enable httpd
+
+                关闭防火墙(或放行http服务)
+                    systemctl stop firewalld
+                    systemctl disable firewalld
+
+        局域网主机: 
+            配置从此网页下载软件：
+                vi /etc/yum.repos.d/web.repo
+                    [web]
+                    name=web
+                    baseurl=http://192. 168.0.66/cdrom
+                    enable= 1
+                    gpgcheck=0
+
+
+    linux (红帽/centos) 的 hosts 路径：/etc/hosts
+
+    SSL:
+        安装ssl:
+            yum install mod_ssI -y
+
+            把证书，私钥，授权信息放入对应文件夹
+            证书: www0.crt
+            
+            cp /root/www0.crt /etc/pki/tls/certs/
+
+            授权信息:
+                cp /root/example-ca.crt /etc/pki/tls/certs/
+        
+            私钥www0.key:
+                cp /root/www0.key /etc/pki/tls/private/
+            
+            编辑ssl配置文件，将以上证书等文件路径填入(修改):
+                vim /etc/httpd/conf.d/ssl.conf
+            
+            修改对应路径:
+
+            保存退出，重启httpd服务:
+                systemctl restart httpd
+
+
+    虚拟主机：
+        用法之一:同级域名，不同主机，(一个 IP对应多个站点)
+            在http副级目录/etc/httpd/conf.d下，新建一个虚拟主机配置文件vhost.conf:
+            主目录: /etc/httpd/conf/httpd.conf
+                
+            vim /etc/httpd/conf.d/vhost.conf
+                <VirtualHost *:80>
+                DocumentRoot "/var/www/html"
+                ServerName www.leon.com
+                </VirtualHost>
+                <VirtualHost * :80>
+                DocumentRoot "/var/www/sports"
+                ServerName sports.leon.com
+                </VirtualHost>
+                <VirtualHost *:80>
+                DocumentRoot "/var/www/music"
+                ServerName music.leon.com
+                </VirtualHost>
+                vim /var/www/htm/index.html
+                this is leon main page 
+
+                #虚拟主机样本配置文件: /usr/share/doc/httpd 版本/httpd-vhost.conf
+        
+        新建一个目录，发布sports.leon.com网页
+            mkdir /var/www/sports
+            vim /var/www/sports/index.html
+            this is leon sports-page
+
+
+    httpd私有目录：
+        <Directory "/var/www/music/jay">
+        Require local
+        </Directory>
+
+        WSGI: python Web Server Gateway Interface
+        
+        网页服务网关接口
+            yum install mod_wsgi -yum
+            vim /etc/httpd/conf.d/vhost.conf
+
+        Listen 6666
+            <VirtualHost * :6666>
+                ServerName webapp.leon.com
+                WSGIScriptAlias / /var/www/htm/webapp.wsgi
+            </VirtualHost>
+
+ 
+
+
+

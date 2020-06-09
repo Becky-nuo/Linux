@@ -1,0 +1,90 @@
+救援模式与交换文件管理：
+    Linux密码重置原理:
+        救援模式(Rescue Mode):（有光盘）,
+            使用其他媒介启动第三方独立系统，将需要重置密码的系统挂载到该系统(光盘自带的小系统)中，修改相应密码文件；
+
+        紧急模式(Emergency Mode)：
+            无启动媒介时，在系统启动过程中，中断正常启动流程，向系统内核传输某参数，绕过认证，进入紧急模式，
+            将原系统挂载到某个文件夹下，从而修改密码文件(需要切换根目录)；
+
+
+        单用户模式(Single-User Mode)：
+            原理大概与紧急模式一样，区别在于将原系统挂载到系统根下(无需切换根目录)；
+
+    步骤：
+        救援模式(系统光盘)：
+            虚拟机:开机瞬间(esc)或“打开电源时进入固件"进入BIOS将启动顺序设置从光驱(CD-ROM) 启动；
+            
+            Troubleshooting (排错模式) --> Resure a Redhat (救援模式) --> 看提示，按1进入rescure mode；
+            原理:将原系统mount到/mnt/sysimage上；
+
+            chroot /mnt/sysimage (修改根目录) passwd root ；
+
+            用户文件: /etc/passwd
+            root:x x表示该用户有密码
+            密码文件: /etc/shadow
+    
+            预防恶意修改root密码: 为BIOS加密；
+
+
+        紧急模式Emergency Mode (无光盘)：
+            原理:从系统硬盘启动，中断正常启动流程向系统内核传输某参数,进入紧急模式将系统根挂载到某文件夹下；
+
+            linux16所在行的末行，加上参数rd.break
+            mount
+            /dev/mapper/rhel-root on /sysroot ....ad-ool.
+        
+            重挂载: mount -0 remount,rw /sysroot
+            chroot /sysroot #将此目录设置为根目录；
+
+            设置语言: LANG=en；
+            修改密码: passwd root；
+            修改完密码后，重打标签；
+            配合SELINUX；
+            
+            touch /.autorelabel (有此文件，系统才会重新加载设置，红帽7版本需要) ；
+            退出:exit、reboot ；
+
+        
+        单用户模式
+            linux16所在行: init=/bin/sh 重新以读写挂载到/
+            重挂载: mount -0 remount,rw /sysroot
+                passwd root
+                touch /.autorelabel
+
+            重启方式: exec /sbin/init ；
+
+        增加交换分区：
+            Swap分区:在系统的运行内存不够用的时候，把物理内存中的一部分空间释放出来，以供当前运行的程序使用，
+            那些被释放的空间可能来自一些很长时间没有什么操作的程序，这些被释放的空间被临时保存到Swap分区中，
+            等到那些程序要运行时，再从swap分区中恢复保存的数据到内存中；
+
+            分配太多的Swap空间会浪费磁盘空间，而Swap空间太少，则系统会发生错误；
+
+            通常情况下，Swap 空间应大于或等于物理内存的大小，最小不应小于64M，通常Swap空间的大小应是物理内存的2-2.5倍；
+
+        
+        增加swap分区:
+            新增硬盘
+            格式化硬盘
+                fdisk
+                m获取帮助
+                n新建分区
+                p建主分区
+                1-4分区号
+                起始扇区2048 直接回车默认
+                结束扇区+5G (分区大小为5G)
+                t修改分区类型:83 (代码)
+                w (保存)
+
+            mkswap /dev/sdb1
+            swapon /dev/sdb1
+
+        将分区加入/etc/fstab开机自动挂载：
+            vi /etc/fstab/etc/fstabswap
+                swap、default、00
+
+
+
+
+

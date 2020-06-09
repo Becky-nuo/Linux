@@ -1,0 +1,153 @@
+软件磁盘阵列：RAID
+    RAID-0(等量模式，stripe):性能最佳；
+        使用相同型号与容量的磁盘来组成时，效果较佳；
+        组成 RAID-0 时，每颗磁盘(Disk A与Disk B)都会先被区隔成为小区块(chunk);
+        当有数据要写入 RAID 时，数据会先被切割成符合小区块的大小，然后再依序放置到不同的磁盘中；
+        越多颗磁盘组成的 RAID-0 性能会越好，因为每颗负责的数据量就更低了；
+        RAID-0 只要有任何一颗磁盘损毁，在 RAID 上面的所有数据都会遗失而无法读取；
+
+    RAID-1(映射模式，mirror):完整备份；
+        模式是“让同一份数据，完整的保存在两颗磁盘上头”;
+        RAID-1 最大的优点大概就在于数据的备份,由于磁盘容量有一半用在备份，因此总容量会是全部磁盘容量的一半;
+    
+    RAID 5:性能与数据备份的均衡考虑；
+        RAID 5 的总容量会是整体磁盘数量减一颗;
+        当损毁的磁盘数量大于等于两颗时，这整组 RAID 5 的数据就损毁了,因为 RAID 5 默认仅能支持一颗磁盘的损毁情况;
+
+    Spare Disk:预备磁盘的功能；
+        当磁盘阵列的磁盘损毁时，就得要将坏掉的磁盘拔除，然后换一颗新的磁盘;
+        为了让系统可以实时的在坏掉硬盘时主动的重建，就需要预备磁盘(spare disk)的辅助;
+    
+    磁盘阵列的优点：
+        数据安全与可靠性：指的并非网络信息安全，而是当硬件 （指磁盘） 损毁时，数据是否还能够安全的救援或使用之意；
+        读写性能：例如 RAID 0 可以加强读写性能，让你的系统 I/O 部分得以改善； 
+        容量：可以让多颗磁盘组合起来，故单一文件系统可以有相当大的容量;
+
+    阵列的设置:
+        语法:$ mdadm --detail /dev/md0  
+        选项与参数： 
+            ——create:   为创建 RAID 的选项; 
+            ——auto=yes: 决定创建后面接的软件磁盘阵列设备，如 /dev/md0, /dev/md1... ;
+            ——chunk=Nk: 决定这个设备的 chunk 大小，也可以当成 stripe 大小，一般是 64K或512K; 
+            ——raid-devices=N:   使用几个磁盘(partition)作为磁盘阵列的设备 ;
+            ——spare-devices=N:  使用几个磁盘作为备用(spare)设备 ;
+            ——level=[015]:  设置这组磁盘阵列的等级，支持很多; 
+            ——detail:   后面所接的那个磁盘阵列设备的详细信息 ;
+
+    格式化与挂载使用RAID:
+        参数：
+            srtipe(chunk)容量为 256K，所以 su=256k ;
+            共有 4 颗组成 RAID5 ，因此容量少一颗，所以 sw=3 ; 
+            由上面两项计算出数据宽度为： 256K*3=768k ;
+
+    仿真RAID错误的救援模式:
+        语法：$  mdadm --manage /dev/md[0-9] [--add 设备] [--remove 设备] [--fail 设备] 
+        选项与参数： 
+            ——add ：会将后面的设备加入到这个 md 中; 
+            ——remove ：会将后面的设备由这个 md 中移除 ;
+            ——fail ：会将后面的设备设置成为出错的状态 ;
+
+
+    
+    Raid磁盘容错系统管理：
+        RAID ( Redundant Arrays of Independent Drives)；
+        独立磁盘构成的具有冗余能力的阵列(磁 盘阵列)；
+    
+    RAID级别(分类)：
+        RAID-0 (条带)：
+            将两块或以上(双数)的相同容量磁盘，从逻辑上合成一个整体，数据同时读写；
+            优势:数据传输速度快，磁盘利用率为100%；
+            缺点:不提供数据冗余(容错) (某块磁 盘损坏，数据将永久破坏)；
+            应用:对海量数据在读写性能方面要求高的，数据安全不要求；
+        
+        RAID-1 (镜像)：
+            将两块或以上(双数)的相同容量磁盘,从逻辑上合成-一个整体,数据同步；
+            优势:保证数据备份，提供冗余(容错)；
+            缺点:数据传输速度较RAID-0慢，磁盘利用率为50%；
+        
+        RAID-5(较验)：
+            将三块或以上的相同容量磁盘，从逻辑上合成-一个整体,使用算法提供数据较验(找回)；
+            总容量为: (n-1) /n ；
+            优势：保证数据安全性（丢失找回；
+            缺点：消耗盘数较多；
+
+        RAID-5相当于RAID-3的升级版；
+
+        RAID-6支持2块较验盘；
+
+        RAID-10 RAID-1的任意组合，至少需要4块盘；
+
+    使用软RAID实现RAID-5:
+        软件: mdadm ( Multiple Devices admin)
+            安装mdadm：yum install mdadm -y
+            添加4块新磁盘(5G)：
+                查看块设备Isblk：
+                    sdb   8:16  0  5G  0  disk
+                    sdc   8:32  0  5G  0  disk
+                    sdd   8:48  0  5G  0  disk
+                    sde   8:64  0  5G  0  disk
+
+            使用4块新磁盘创建RAID-5：
+                mdadm -Cv /dev/md0 -15 -n4 /dev/sdb /dev/sdc /dev/sdd /dev/sde
+                也可以简写为: sd[b,c,d,e]， 或sd[b-e] :
+                    mdadm -Cv /dev/md0 -15 -n4 /dev/sd[b,c,d,e]
+
+                停止(删除) : mdadm -S /dev/md0；
+                
+                参数说明:
+                    -C      创建RAID， (Create) ；
+                    -v      显示创建信息(进度)；
+                    /dev/md5创建的RAID-5名；
+                    -15 (-level5) 级别5；
+                    -n      硬盘数；
+
+            查看RAID：
+                mdadm -D /dev/md5
+                (-D: Details) 注意进度条% (没有进度条时即可)；
+                
+            
+            使用/dev/md5：
+                分区: fdisk /dev/md5 (逻辑块设 备)
+                格式化: mkfs.xfs /dev/md5p1
+                新建目录做为挂载点：mkdir /webdate；
+                挂载(临时) : mount /dev/md5p1 /webdate；
+                测试:在RAID-5设备中创建文件：touch /webdate/haha.txt；
+
+            
+            模拟磁盘损坏：
+                mdadm /dev/md5 -f /dev/sdc
+                -f (fault)：标识坏盘
+                或移除一个硬盘
+                查看RAID状态：mdadm _D /dev/md0
+
+            修复RAID-5：
+                mdadm /dev/md5 -a /dev/sdc
+                
+            注意:在现实生产环境中，在不关机的情况下热插拔硬盘(坏盘)，需要执行以下命令：
+                mdadm /dev/md0 -f /dev/sdc
+                mdadm /dev/md0 -r /dev/sdc
+
+        
+        为RAID称加热备盘：
+            RAID热备盘：提供在线更换的al-time备用盘
+                
+            为系统添加一块新硬盘(vmware 加硬盘需要重启后才能识别)
+                或：在创建RAID时同时指定热备盘:
+                停止： mdadm -S /dev/md5
+                mdadm -Cv /dev/md5 -I5 -n4 -x1 /dev/sd[b-f]
+
+        配置RAID-10：
+            配置底层RAID-0
+                使用sdb，sdc配置RAID-0：mdadm -Cv /dev/md0 -10 -n2 /dev/sd[b,c]
+                使用sdd，sde 配置RAID-0：mdadm -Cv /dev/md2 -10 -n2 /dev/sd[d,e]
+
+            配置上层RAID-1：mdadm -Cv /dev/md10 -|1 -n2 /dev/md；
+
+            格式化md10：mkfs.xfs /dev/md10 ；
+
+
+
+
+
+
+

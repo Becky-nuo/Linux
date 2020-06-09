@@ -1,0 +1,79 @@
+网络文件服务与时钟同步：
+    NFS (Network File System)网络文件系统：
+        服务端:：
+            yum info nfs-utils
+            man exports
+            vi /etc/exports
+                /nfs1 172.25.0.0/24(ro)
+                /nfs1 *(ro,sync,root. squash)
+                
+                sync硬盘同步写入
+                async硬盘异步写入
+            root_ squash管理员权限压缩为nobody (root 远程后，变成nobody，默认)
+            systemctl restart nfs-server && systemctl enable nfs-server
+        
+        客户端：
+            yum install nfs-utils
+            mkdir /mnt/nfsmount
+            mount -t nfs serverIP地址:/nfs1 /mnt/nfsmount
+            Is /mnt/nfsmount
+            grep nfsnobody /etc/passwd
+
+    
+    web+nfs：
+        nfs服务器：
+            mkdir -p /web/sports
+            mkdir -p /web/music
+
+            vim /etc/exports
+                /web 192.168.0.0/24(ro)
+
+            重启相关服务：
+                systemctl restart rpcbind；
+                systemctl restart nfs；
+
+            web服务器:
+                mount -t nfs serverlP地址:/web/sports /ar/www/sports；
+                moutn -t nfs serverlP地址: /web/music /var/www/music； 
+
+            开机自动挂载：
+                vi /etc/fstab
+                    serverlP地址：/sports /var/www/sports nfs defaults,ro 00
+                    serverlP地址：/music /var/www/music nfs defaults,ro 00
+                    mount -a
+
+        参数详细说明：
+            ro：设置共享为只读，缺省选项；
+            rw：设置共享为读写；
+            root_squash：当源计算机(NFS客户端)当前用户是root时，将被映射为目标计算机(NFS服务器)的匿名用；
+            no_root_squash：当源计算机(NFS客户端)当前用户是root时，将被映射为目标计算机(NFS服务器)的root用；
+            all squash：将所有用户映射为目标计算机(NFS服务器)的匿名用户，NFS 缺省选项；
+            anonuid：设置匿名用户的UID；
+            anongid：设置匿名用户的GID；
+            
+            sync：保持数据同步，同时将数据写入内存和硬盘，缺省选项；
+            async：先将数据保存在内存，然后写入硬盘，效率更高，但可能造成数据丢失；
+            secure：NFS客户端必须使用NFS保留端口(1024以下的端口)，缺省选项；
+            insecure：允许NFS客户端不使用保留端口(1024以下的端口)；
+            
+            wdelay：如果NFS服务器怀疑有另一个相关的写请求正在处理或马上就要达到，NFS 服务器将延迟提交写请求到磁盘，
+            这就允许使用一个操作提交多个写请求到磁盘，可以改善性能，缺省选项；
+            
+            nowdelay：设置了async时该选项无效，NFS服务器将每次写操作写入磁盘；
+
+    时钟同步：chrony
+        服务端：
+            查看软件包情况: yum info chrony；
+            查看服务情况: systemctl status chronyd；
+        
+        服务端配置:
+            vi /etc/chrony.conf
+                开启22行: alow 192.168/24 (允许同步的网络段, 这里写了192.168.0.0/24网络段)；
+                开启29号: local stratum 10 (允许本机提供时钟服务，刷新间隔10分钟)；
+                #iburst间隔性的请求，防止被认为恶意请求；
+
+        查看同步情况：chronyc sources -V ；
+
+
+
+

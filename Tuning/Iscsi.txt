@@ -1,0 +1,105 @@
+iSCSI存储系统管理：
+    常见的存储类型：
+        直连存储：DAS；
+        外挂存储：
+            SAN：存储区域网络，是一个网络上的磁盘；
+            NAS：网络附加存储，是一个网络上的文件系统；
+
+        SAN的分类：
+            FC-SAN：
+                Fibre Channel（光纤通道）；
+                SCSI协议；
+                快、贵、维护困难；
+            
+            IP-SAN： 
+                IP
+                iSCI协议
+                快（千兆、万兆网已普及）、价格便宜、维护容易；
+
+    硬盘物理接口：SATA、IDE、SCSI、iSCSI（Internet 微型计算机接口；
+
+    相关概念：
+        Target：目标器，当iSCSI启动器联机至iSCSI Target时，iSCSI Target上连接的所有LUN也
+        会联机至客户端的操作系统；
+        
+        LUN：逻辑存储号，经过编号的硬盘或实体硬盘所建立的一个存储空间，它是真正的存储实体，
+        用户可以在iSCSI LUN上建立并管理文件，和本地硬盘一样；
+
+
+    服务器配置：
+        创建lv：lvcreate vg-md5 -n lv-iscsi -L 8G
+            软件：targetcli
+            语法：yum install targetcli -y
+
+        创建target
+            命令：targetcli
+                    />ls
+
+            targetcli目录：
+                -backstores
+                -block
+                -fileio
+                -pscsi
+                -ramdisk
+                -iscsi
+                -loopback
+
+                到backstores/block下定义一个iscsi设备，命名为leon-iscsi；
+
+                /> cd backstores/block>
+                backstores/block>create name=leon-iscsi dev=/dev/vg-md5/lv-md5；
+
+
+            到iscsi目录下，创建一个服务端的目标器iqn码目录：/>cd iscsi> 
+            iscsi>create iqn.2020-03.com.leon:server
+    
+            成功后会出现一个新的tpg	组：
+                -tpg1
+                -acls
+                -luns
+                -portals
+
+
+            在tpg1/luns目录下配置luns（使用上面新定义的leon-iscsi设备）：
+                cd /iscsi/iqn.2020-03.com.leon:server/tpg1/luns
+                /iscsi/iqn.2020-03.com.leon:server/tpg1/luns>create /backstores/block/leon-iscsi
+
+            在tpg1/acls目录下配置acls规则（定义客户端使用的iqn码）：
+                cd /iscsi/iqn.2020-03.com.leon:server/tpg1/acls
+                /iscsi/iqn.2020-03.com.leon:server/tpg1/acls>create iqn.2020-03.com.leon:client
+
+            在tpa1/portals目录定义服务器访问端口：
+                cd /iscsi/iqn.2020-03.com.leon:server/tpg1/portals
+                /iscsi/iqn.2020-03.com.leon:server/tpg1/portals>create 192.168.0.66 3260
+
+            在tpg1目录下关闭tgp帐号认证：
+                cd /iscsi/iqn.2020-03.com.leon:server/tpg1/
+                /iscsi/iqn.2020-03.com.leon:server/tpg1>set attribute authentication=0
+
+            设置tgp1组使用自定义的acl（iqn）节点访问规则：
+                /iscsi/iqn.2020-03.com.leon:server/tpg1>set attribute generate_node_acls=0
+
+            保存退出：/>saveconfig
+
+        重启target服务，并加入开机自启：
+            systemctl restart target
+            systemctl enable target
+
+    客户端配置：
+        安装软件：yum install iscsi-initiator-utils -y
+
+        设置启动器iqn：（写上在服务器acls里定义的iqn码）
+            vim /etc/iscsi/initiatorname.iscsi
+            InitiatorName=iqn.2020-03.com.leon:client
+
+        尝试发现目标器（target）
+            iscsiadm --mode discoverydb --type sendtargets --portal 192.168.0.66 --discover
+
+            -m mode，模式
+            -t type，类型
+            -p [ip：端口]
+            -s stats，显示状态
+
+        登录target：iscsiadm -m node -l
+
+        查看本地设备：lsblk

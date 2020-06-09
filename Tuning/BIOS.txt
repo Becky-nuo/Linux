@@ -1,0 +1,118 @@
+网络安装服务器配置：
+    BIOS-选择启动设备
+    硬盘
+    next-server
+
+    PXE网络安装原理(流程)：
+        1.PXE网络启动，寻找DHCP服务器，获取IP地址以及下一个服务器(next server) ttp server相关信息(比如tftp的IP)；
+        2.DHCP回应IP地址，以及“下一步线索”；
+        3.找到tftpserver之后，请求tftp服务根目录下的pxelinux.0启动文件 /av/ib/ttpboot) 172.25.0.0/24；
+        4.响应第3步请求；
+        
+        5.启动pxelinux.0文件后，会在当前ttp根目录下，寻找pxelinux.cfg的文件夹下名为default的配置文件，
+        default 文件里会记录“系统预安装环境”在哪个服务器里；
+        
+        6.安装操作系统；
+
+    
+    配置DHCP服务器
+        安装: yum install dhcp -y
+        配置:
+            使用模板文件: cp /usr/share/doc/dhcp*/dhcpd.simple /etc/dhcp/
+
+    配置tftp-server
+        安装:yum install tftp-server xinetd -γ
+        开启服务: vi /etc/xinetd.d/ftp     disable=no；
+            注意：server_ args 选项指定的是tftp的默认根目录ar/ib/ttpboot，pxelinux.0 需要放在这里；
+
+        启动服务:
+            systemctl start tftp
+            systemctl start xinetd
+            
+        
+            pxelinux.0：
+                获取pxelinux.0文件:  yum install syslinux -y
+                查找: rpm -ql syslinux | grep pxelinux.0
+                拷贝到ttp根目录下：cp /use/share/systinux/pxelinux.0 /var/lib/tftpboot/
+
+            
+            制作启动配置文件(pxelinux.cfg/default)
+                建文件夹: mkdir /var/ib/tftpbootpxelinux.cfg
+                使用光盘自带的启动文件:cp /mnt/isolinux/isolinux.cfg /arlib/tftpboot/pxelinx.cfg/default
+                
+                使用光盘自带的相关所需配置文件:
+                    bot.msg:    启动菜单显示信息；
+                    vmlinuz:    系统内核；
+                    initrd.img:  系统镜像；
+                    vesamenu.c32:   系统核心文件；
+
+            cd /mnt/isolinux
+            cp boot.msg vmlinuz initrd.img vesamenu.c32 /ar/ib/tftpboot
+
+
+            修改启动菜单:   vi /var/ib/ tftpboot/ pxelinu.cfg/default；
+
+            修改等待时间:timeout 60   (6秒)；
+        
+            修改默认菜单：menu default放入相关label下；
+
+
+    
+    配置ftp服务器提供镜像：
+        yum install vsftpd -y
+        systemctl start vsftpd
+
+        默认匿名用户名ftp,密码随意，ftp 根目录: /ar/tp/pub
+    
+        将光碟内容拷贝到/var/ftp/pub 
+            # cp /mnt/* /var/ftp/ pub
+            或mount /dev/cdrom /var/ftp/pub (生产环境不建议)
+        
+        修改启动菜单里系统文件安装路径：
+            vi /var/ib/tftpboot/ pxelinux.cfg/default 
+                label linux
+                append initrd=initrd.img inst.stage2-tp://ftp服务器IP地址/pub quiet
+                (为实验方便，关闭selinux，或修改/var/ftp/pub 的selinux上下文)
+            
+            setenforce 0
+
+        vim /etc/sysconfig/selinux将enforcing >disabled (需要重启)
+
+
+    配置无人值守安装，创建应答文件
+        安装kickstart: 
+            yum install system-config-kickstart -y；
+        
+        安装图形化环境，配置kickstart：
+            yum groupinstall "Server with GUI"-y；
+
+        设置中文字符：LANG=zh_ _CN.UTF-8 ；
+        启动图形:   startx  ；
+
+        打开kickstart图形交互界面:
+            软件包界面无显示，需要修改yum源的标签名为"[development]"
+
+            步骤: 
+                基本配置:   语言-键盘时区(Asia/Shanghai) -密码-安装后重启在文本格式中执行安装；
+                安装方法:   执行全新安装-FTP-FTP目录( pub)；
+                引导装载程序选项：安装新引导装载程序-在主引导记录(MBR) 中安装引导装载程序；
+                分区信息：清除主引导记录删除所有现存分区初始化磁盘标签；
+                添加分区:   swap, / ；
+                网络配置：
+                验证(默认)；
+                防火墙(开启或关闭，开启时信任SSH服务)；
+                显示配置：取消图形环境；
+                软件包选择(基本， 勾引如vim、wget等随意)；
+                保存；
+
+        在default配置文件里，指定应答文件：
+            vim /var/ib/tftpboot/ pxelinux.cfg/default
+                label
+                append initrd=initrd.img inst.stage2-fp://ftp服务器IP地址/pub ks-tfp://ftp 
+                服务器IP地址/pub/ks.cfg quiet   ；
+
+
+
+
+
+

@@ -1,0 +1,50 @@
+链路聚合HA (High Available):高可用，用于防止单点故障；
+    HA是双机集群系统简称，指高可用性集群，是保证业务连续性的有效解决方案，一般有两个或两个以上的节点，且分为活动节点及备用节点；
+    
+    使用图形化交互界nmtui面配置team ：
+        yum istall NetworkManager -y (如果没有 nmtui命令,需要安装此组件包)
+
+    nmtui：
+        
+    
+    测试:
+        关闭其中一块网卡
+        
+        注意: VMware虚拟机做team,需要附加配置(主网卡断开会出问题)
+        
+        原因:聚合链路获取mac的地址的两种方式
+            1）一种是从第一个活跃网卡中获取mac地址，然后其余的SLAVE网卡的mac地址都使用该mac地址(默认方式) ；
+            2）一种是使用hwaddr_policy参数，team使用当前活跃网卡的mac地址，mac地址随活跃网卡的转换而变；
+            
+            VMWare不支持第一种获取MAC地址的方式；
+        
+        解决方案:
+            建team的时候设置mac地址跟随active的节点 {"unner":"name":"activebackup", "hwaddr. policy": "by_ active"}}' ；
+            查看team的工作状态: teamdct team0 state ；
+            观察team的mac地址变化；
+            
+            查看网卡设备: nmcli dev status
+            查看网一卡配置: nmcli con show
+            
+        team0的工作模式: {"runner'":("name'"activebackup"}}
+            热备模式: activebackup
+            
+            负载均衡模式: loadbalance
+            
+            1.使用nmcli配置team
+                1)创建team: 
+                    nmcli connection add type team con-name team1 ifname nm-team1 config
+                    "runnr'"("name'"."activebackup"}'
+                    
+                2)添加接口工作网卡:
+                    nmcli connection add type team-slave con-name team1-port1 ifname ens33 master nm-team1
+                    nmcli connection add type team-slave con-name team1 port2 ifname ens38 master nm-team1
+                    
+                3)设置team接口地址:
+                    nmcli connection modify team1 ifv4.addresses 192. 168.100.50/24 ipv4.method manual  connection.autoconnect yes
+                    
+                
+                4)激活team: 
+                    nmcli connection up team1
+
+

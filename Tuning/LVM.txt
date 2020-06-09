@@ -1,0 +1,67 @@
+LVM逻辑卷管理：
+    LVM逻辑卷概念：
+        PV: Physical Volume物理卷
+        VG: Volume Group    卷组
+        LV: Logical Volume逻辑卷
+        PE: Physical extent逻辑卷单元(单位)
+
+    
+    创建LVM逻辑卷：
+        创建pv：
+            语法：pvcreate /dev/md5
+            查看pv： pvs 
+
+        创建vg：
+            语法: vgcreate 卷组名PV设备-sPE 大小(默认 4M)
+            如: vgcreate vg-md5/dev/md5 -s 16M
+            查看vg: vygs
+
+        创建Iv：
+            语法: Ivcreate 卷组名-n 逻辑卷名-1 pe数量(-1 以PE为单为指定逻辑卷大小)
+            如: Ivcreate vg-md5 -n lv-md5 L 5G (-L 指定最终大小)
+            查看Iv: Ivs
+
+        格式化Iv：
+            语法：mkfs.ext4 /dev/vg md5/lv-md5
+
+
+        开机自动挂载：
+            语法：mkdir /webdate/
+                vim /etc/fstab
+                /dev/md5-vg/md5-lv /webdate ext4 default 0 0
+
+    
+    LVM逻辑卷扩容：
+        lv扩容1： (从 vg剩下空间扩容)
+            查看vg容量： vgs
+                Ivextend L 12G /dev/vg md5/lv-md5 -r
+
+            参数说明:
+                -L  扩容最终大小；
+                -l  以PE为单位设定最终大小；
+                -r  刷新挂载点文件系统大小；
+        
+        Iv扩容2：(vg 空间不足，新增物理设备)
+            新增硬盘(或分区)
+            新增硬盘: sdf
+                将sdf设置为pv：pvcreate /dev/sdf
+                新pv加入卷组：vgextend vg-md5 /dev/sdf
+                查看: vgs
+
+            扩容：lvextend L 30G /dev/vg- md/lv-md5 r
+
+
+    相关命令：
+        增容：
+            extend
+            如： vgextend, Ivextend
+
+        减容： 
+            reduce
+            如：vgreduce，Ivreduce
+        
+        删除：
+            remove
+            如：pvremove， vgremove， Ivremove
+
+
