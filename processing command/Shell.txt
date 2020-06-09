@@ -1,0 +1,517 @@
+Bash shell ：
+    功能：
+        /bin/bash是Linux默认的shell,目前是 Linux distributions 的标准 shell；
+        
+        优点：
+            命令编修能力：history)
+                能记忆使用过的指令，默认的指令记忆功能可到达1000个；
+                存储位置：.bash_history(记录前一次登录以前执行过的指令)
+
+            命令与文件补全功能：[tab] 按键的好处
+                少打很多字；
+                确定输入的数据是正确的！
+                [Tab] 接在一串指令的第一个字的后面，则为命令补全； 
+                [Tab] 接在一串指令的第二个字以后时，则为“文件补齐”！ 
+            
+                若安装 bash-completion 软件，则在某些指令后面使用 [tab] 按键时，
+                可以进行“选项/参数的补齐”功能！
+
+            
+            命令别名设置功能：alias
+                alias lm='ls -al';
+
+
+            工作控制、前景背景控制：job control,foreground,background
+                不怕不小心使用了 [Ctrl] + c 来停掉该程序;
+                可以在单一登陆的环境中，达到多任务的目的;
+
+
+            程序化脚本：shell scripts:
+            可以将你平时管理系统常需要下达的连续指令写成一个文件， 
+            该文件并且可以通过对谈互动式的方式来进行主机的侦测工作;
+
+            可以借由 shell 提供的环境变量及相关指令来进行设计；
+
+            在 DOS 下面需要程序语言才能写的东西，在 Linux 下面使用简单
+            的 shell scripts 就可以帮你达成
+
+
+            万用字符：Wildcard
+                支持许多的万用字符来帮助使用者查询与指令下达;
+                其他可供利用的万用字符， 这些都能够加快使用者的操作；
+
+
+        查询指令是否为Bash shell的内置命令：type
+            type [-tpa] name 
+            选项与参数
+                ：不加任何选项与参数时，type 会显示出 name 是外部指令还是 bash 
+                内置指令 -t ：当加入 -t 参数时，type 会将 name 以下面这些字眼显
+                示出他的意义： 
+                    file ：表示为外部指令； 
+                    alias ：表示该指令为命令别名所设置的名称； 
+                    builtin ：表示该指令为 bash 内置的指令功能； 
+                    -p ：如果后面接的 name 为外部指令时，才会显示完整文件名； 
+                    
+                    -a ：会由 PATH 变量定义的路径中，将所有含 name 的指令都列出来，
+                    包含 alias 
+            
+            
+            范例一：查询一下 ls 这个指令是否为 bash 内置？ 
+                $ type ls ls is aliased to `ls --color=auto' 
+                        #未加任何参数，列出 ls 的最主要使用情况 
+                    
+                $ type -t ls alias      #仅列出 ls 执行时的依据 
+                $type -a ls ls is aliased to `ls --color=auto'      #最先使用 
+                aliase 
+                ls is /usr/bin/ls       #还有找到外部指令在 /bin/ls 
+                
+            范例二： cd 
+            $ type cd cd is a shell builtin    #cd 是 shell 内置指令
+
+            通过 type 这个指令我们可以知道每个指令是否为 bash 的内置指令;
+            type 主要在找出“可执行文件”而不是一 般文件文件名;
+            type 可以用来作为类似 which 指令的用途;
+
+
+
+        指令的下达与快速编辑按钮：
+            [Enter] 按键是紧接着反斜线 （\） 的，两者中间没有其他字符；
+            
+            顺利跳脱 [Enter] 后，下一行最前面就会主动出现 > 的符号，你可以继续输入指令;
+            
+            [ctrl]+u/[ctrl]+k分别是从光标处向前删除指令串([ctrl]+u)及向后删除指令串([ctrl]+k)；
+        
+            [ctrl]+a/[ctrl]+e分别是让光标移动到整个指令串的最前面([ctrl]+a)或最后面([ctrl]+e);
+            
+            可以通过 man 这个线上查询来查询指令的使用方式与参数说明;
+
+
+    shell的变量功能
+        含义：变量是 bash 环境中非常重要的一部分,Linux 是多用户多任务的环境，每个人登陆系统都能取得一个 bash shell，
+            每个人都能够使用 bash 下达 mail 这个指令来收受“自己”的邮件等等;
+
+        什么是变量：
+            含义：就是让某一个特定字串代表不固定的内容；
+                (变量就是以一组文字或符号等，来取代一些设置或者是一串保留的数据！)
+            例子：y=a 'x'+b
+                用一个简单的 "字眼" 来取代另一个比较复杂或者是容易变动的数据;
+
+            特性：
+            变量的可变性与方便性:
+            影响 Bash 环境操作的变量；
+            脚本程序设计(shell script);
+
+        变量的取用与设置:
+            echo:来取用变量,但变量在被取用时，前面必须要加上钱字号“ $ ”才行；
+            显示自己的环境变量HOME和MALL：
+                echo $HOME 或者是 echo ${HOME} 
+                echo $MAIL 或者是 echo ${MAIL}
+
+            例子：将myname的变量名称的内容设置为VBird;
+                $ echo ${myname} #这里并没有任何数据,因为这个变量尚未被设置,是空的;
+                $ myname=VBird 
+                $ echo ${myname} 
+                    VBird   #这个变量已经被设置;
+                (在 bash 当中，当一个变量名称尚未被设置时，默认的内容是“空”的)
+
+        变量的设置规则：
+            变量与变量内容以一个等号“=”来链接，如： “myname=VBird” ；
+            
+            等号两边不能直接接空白字符，如下所示为错误： “myname = VBird”或“myname=VBird Tsai” ；
+            
+            变量名称只能是英文字母与数字，但是开头字符不能是数字，如错误为： “2myname=VBird” ；
+            
+            变量内容若有空白字符可使用双引号“"”或单引号“'”将变量内容结合起来，但 
+                双引号内的特殊字符如 $ 等，可以保有原本的特性，如： 
+                    “var="lang is $LANG"”则“echo $var”可得“lang is zh_TW.UTF-8” 
+                单引号内的特殊字符则仅为一般字符 （纯文本），如：
+                    “var='lang is $LANG'”则“echo $var”可得“lang is $LANG” ；
+
+            可用跳脱字符“ \ ”将特殊符号（如 [Enter], $, \, 空白字符, '等）变成一般字符，
+            如：“myname=VBird\ Tsai” ；
+            
+            在一串指令的执行中，还需要借由其他额外的指令所提供的信息时，可以使用反单引号“`指令`”或 “$（指令）”；
+            特别注意，那个 ` 是键盘上方的数字键 1 左边那个按键，而不是单引号！ 
+            例如想要取得核心版本的设置：
+                “version=$（uname -r）”再“echo $version”可得“3.10.0-229.el7.x86_64” ；
+            
+            若该变量为扩增变量内容时，则可用 "$变量名称" 或 ${变量} 累加内容，如：
+            “PATH="$PATH":/home/bin”或“PATH=${PATH}:/home/bin” ；
+            
+            若该变量需要在其他子程序执行，则需要以 export 来使变量变成环境变量：
+                “export PATH” ；
+            
+            通常大写字符为系统默认变量，自行设置变量可以使用小写字符，方便判断；
+            
+            取消变量的方法为使用 unset ：
+                “unset 变量名称”例如取消 myname 的设置： “unset myname”;
+
+
+        环境变量的功能：
+            环境变量可以帮我们达到很多功能，比如:主文件夹的变换、提示字符的显示、可执行文件搜寻的路径等等;
+
+            HOME:   代表使用者的主文件夹,可以使用 cd ~ 去到自己的主文件夹或者利用 cd 就可以直接回到使用者主文件夹;
+            
+            SHELL:  告知我们，目前这个环境使用的 SHELL 是哪支程序，Linux默认使用 /bin/bash ;
+            
+            HISTSIZE:   这个与“历史命令”有关，曾经下达过的指令可以被系统记录下来，而记录的“笔数”则是由这个值来设置的;
+            
+            MAIL:   当我们使用 mail 这个指令在收信时，系统会去读取的邮件信箱文件 （mailbox);
+            
+            PATH:   就是可执行文件搜寻的路径啦～目录与目录中间以冒号（:）分隔， 由于文件的搜寻是依序由 PATH 的变量
+                内的目录来查询，所以，目录的顺序也是重要的； 
+            
+            LANG:   是语系数据,很多讯息都会用到它，中文编码通常是 zh_TW.Big5 或者是 zh_TW.UTF-8，这两个编码偏偏不容易被解译出来，
+                所以，有的时候，可能需要修订一下语系数据；
+            
+            RANDOM: 这个就是“随机乱数”的变量！目前大多数的 distributions 都会有乱数产生器，就是 /dev/random 这个文件。 
+                如： $echo $number 8    #此时会随机取出 0~9 之间的数值喔！
+
+            
+            例一：列出目前的 shell 环境下的所有环境变量与其内容:
+                $ env 
+                HOSTNAME=study.centos.vbird  #这部主机的主机名称 
+                TERM=xterm          #这个终端机使用的环境是什么类型 
+                SHELL=/bin/bash     #目前这个环境下，使用的 Shell 是哪一个程序？ 
+                HISTSIZE=1000       #“记录指令的笔数”在 CentOS 默认可记录 1000 笔 
+                OLDPWD=/home/dmtsai     #上一个工作目录的所在 
+                LC_ALL=en_US.utf8    #由于语系的关系，鸟哥偷偷丢上来的一个设置 
+                USER=dmtsai     #使用者的名称 
+                MAIL=/var/spool/mail/dmtsai  #这个使用者所取用的 mailbox 位置 
+                PATH=/usr/local/bin:=/home/dmtsai   #目前使用者所在的工作目录 （利用 pwd 取出！） 
+                LANG=zh_TW.UTF-8        #这个与语系有关，下面会再介绍！ 
+                HOME=/home/dmtsai    #这个使用者的主文件夹啊！ 
+                LOGNAME=dmtsai      # 登陆者用来登陆的帐号名称 
+                _=/usr/bin/env      #上一次使用的指令的最后一个参数（或指令本身）;
+                    (env 是 environment （环境） 的简写)
+
+        用set观察所有变量：
+            $ set 
+                BASH=/bin/bash    #bash 的主程序放置路径 
+                BASH_VERSINFO=（[0]="4" [1]="2" [2]="46" [3]="1" [4]="   #这两行是 bash 的版本啊！ 
+                COLUMNS=90      #在目前的终端机环境下，使用的字段有几个字符长度；
+                HISTFILE=/home/dmtsai/.bash_history         #历史命令记录的放置文件，隐藏文件 ；
+                HISTFILESIZE=1000        #存起来（与上个变量有关）的文件之指令的最大纪录笔数；
+                HISTSIZE=1000       #目前环境下，内存中记录的历史命令最大笔数。 
+                IFS=$' \t\n'        #默认的分隔符号 ；
+                LINES=20        #目前的终端机下的最大行数 
+                MACHTYPE=x86_64-redhat-linux-gnu    #安装的机器类型 
+                OSTYPE=linux-gnu        #操作系统的类型 
+                PS1='[\u@\h \W]\$ '         #PS1 就厉害了。这个是命令提示字符，常见的 [root@www ~]# 或 [dmtsai ~]$ 的设置值; 
+                PS2='> '        #如果你使用跳脱符号 （\） 第二行以后的提示字符也 ;
+                $       #目前这个 shell 所使用的 PID;
+                ?       #刚刚执行完指令的回传值;
+                    (在 Linux 默认的情况中，使用{大写的字母}来设置的变量一般为系统内定需要的变量)
+
+            PS1:提示符的设置；
+                \d ：可显示出“星期 月 日”的日期格式，如："Mon Feb 2" ；
+                \H ：完整的主机名称； 
+                \h ：仅取主机名称在第一个小数点之前的名字；
+                \t ：显示时间，为 24 小时格式的“HH:MM:SS” ；
+                \T ：显示时间，为 12 小时格式的“HH:MM:SS” ；
+                \A ：显示时间，为 24 小时格式的“HH:MM” ；
+                \@ ：显示时间，为 12 小时格式的“am/pm”样式 ；
+                \u ：目前使用者的帐号名称，如“dmtsai”； 
+                \v ：BASH 的版本信息； 
+                \w ：完整的工作目录名称，由根目录写起的目录名称。但主文件夹会以 ~ 取代； 
+                \W ：利用 basename 函数取得工作目录名称，所以仅会列出最后一个目录名； 
+                \# ：下达的第几个指令；
+                \$ ：提示字符，如果是 root 时，提示字符为 # ，否则就是 $ ；
+
+
+    Bash Shell的操作环境:
+        路径与指令搜寻顺序：
+            以相对/绝对路径执行指令，例如“ /bin/ls ”或“ ./ls ”； 
+            由 alias 找到该指令来执行； 
+            由 bash 内置的 （builtin） 指令来执行； 
+            通过 $PATH 这个变量的顺序搜寻到的第一个指令来执行;
+
+            例一：设置 echo 的命令别名成为 echo -n ，然后再观察 echo 执行的顺序：
+                    $ alias echo='echo -n' 
+                    $ type -a echo 
+                        echo is aliased to `echo -n' 
+                        echo is a shell builtin 
+                        echo is /usr/bin/echo
+                    (先 alias 再 builtin 再由 $PATH 找到 /bin/echo)
+
+        bash的环境配置文件：
+            login shell: 取得 bash 时需要完整的登陆流程的，就称为 login shell；举例来说，
+            你要由 tty1 ~ tty6 登陆，需要输入使用者的帐号与密码，此时取得的 bash 就称为“ login shell ”啰； 
+            
+            non-login shell：取得 bash 接口的方法不需要重复登陆的举动，举例来说，
+                    (1)你以 X window 登陆 Linux 后， 再以 X 的图形 化接口启动终端机，
+                    此时那个终端接口并没有需要再次的输入帐号与密码，那个 bash 的环境就称为 non-login shell了；
+                    (2) 你在原本的 bash 环境下再次下达 bash 这个指令，同样的也没有输入帐号密码， 
+                    那第二个 bash （子程序） 也是 non-login shell ；
+
+                /etc/proflie(login shell 才会读)
+                PATH：会依据 UID 决定 PATH 变量要不要含有 sbin 的系统指令目录； 
+                MAIL：依据帐号设置好使用者的 mailbox 到 /var/spool/mail/帐号名； 
+                USER：根据使用者的帐号设置此一变量内容； HOSTNAME：依据主机的 hostname 指令决定此一变量内容； 
+                HISTSIZE：历史命令记录笔数。CentOS 7.x 设置为 1000 ； 
+                umask：包括 root 默认为 022 而一般用户为 002 等；
+
+                /etc/profile.d/*.sh：在 /etc/profile.d/ 目录内,扩展名为 .sh，使用者能够具有 r 的权限，该文件就会被 /etc/profile 调用；
+                /etc/locale.conf：是由 /etc/profile.d/lang.sh 调用的,决定 bash 默认使用何种语系的重要配置文件；
+                
+                /usr/share/bash-completion/completions/*:命令补齐、文件名补齐，还有行指令的选项/参数补齐功能；
+                        bash 的 login shell 情况下所读取的整体环境配置文件只有 /etc/profile；
+
+                ~/.bash_profile （login shell 才会读）
+                    ~/.bash_profile 
+                    ~/.bash_login 
+                    ~/.profile
+                    bash 的 login shell 设置只会读取上面三个文件的其中一个， 而读取的顺序则是依照上面的顺序；
+
+                source:读入环境配置文件的指令;
+                    语法：source 配置文件文件名 ；
+                    例：将主文件夹的 ~/.bashrc 的设置读入目前的 bash 环境中 ；
+                        $ source ~/.bashrc  #下面这两个指令是一样的； 
+                        $ . ~/.bashrc
+
+                    利用 source 或小数点 （.） 都可以将配置文件的内容读进来目前的 shell 环境中；
+
+                ~/.bashrc （non-login shell 会读）
+                    依据不同的 UID 规范出 umask 的值； 
+                    依据不同的 UID 规范出提示字符 （就是 PS1 变量）； 
+                    调用 /etc/profile.d/*.sh 的设置
+
+        其他相关配置文件：
+            /etc/man_db.conf：跟 bash 没相关性,文件的内容“规范了使用 man， man page 的路径寻找;
+            ~/.bash_history：历史命令，默认的情况下， 我们的历史命令就记录在这里，记录多少，跟Histflesize有关；
+            ~/.bash_logout：文件记录了“当我登出 bash 后，系统再帮我做完什么动作后才离开”，例如：清空暂存盘；
+
+
+    shell scripts：
+        shell script：是利用 shell 的功能所写的一个'程序(program)'，这个程序是使用纯文本文件，将一些 shell 的语法与指令(含外部指令)写在里面，
+            搭配正则表达式、管线命令与数据流重导向等功能，以达到我们所想要的处理目的；
+
+            shell script 用在系统管理上面是很好的一项工具，但是用在处理大量数值运算上， 就不够好了，因为 Shell scripts 的速度较慢，且使用的 CPU 
+            资源较多，造成主机资源的分配不良；
+
+            功能：
+                自动化管理的重要依据；
+                追踪与管理系统的重要工作；
+                简单入侵侦测功能；
+                连续指令单一化；
+                简易的数据处理；
+                跨平台支持与学习历程较短；
+
+        script的撰写和执行：
+            注意事项：
+                指令的执行是从上而下、从左而右的分析与执行； 
+                指令的下达就如同第四章内提到的： 指令、选项与参数间的多个空白都会被忽略掉； 
+                空白行也将被忽略掉，并且 [tab] 按键所推开的空白同样视为空白键； 
+                如果读取到一个 Enter 符号 （CR） ，就尝试开始执行该行 （或该串） 命令；
+                至于如果一行的内容太多，则可以使用“ \[Enter] ”来延伸至下一行； 
+                “ # ”可做为注解！任何加在 # 后面的数据将全部被视为注解文字而被忽略;
+
+            执行方法：
+                直接指令下达： shell.sh 文件必须要具备可读与可执行 （rx） 的权限，然后： 
+                    绝对路径：使用 /home/dmtsai/shell.sh 来下达指令； 
+                    相对路径：假设工作目录在 /home/dmtsai/ ，则使用 ./shell.sh 来执行 
+                    变量“PATH”功能：将 shell.sh 放在 PATH 指定的目录内，例如： ~/bin/ 
+                
+                以 bash 程序来执行：通过“ bash shell.sh ”或“ sh shell.sh ”来执行；
+                (shell.sh 在 ~/bin 内且具有 rx 的权限，那就直接输入 shell.sh 即可执行该脚本程序)
+                (重点让 shell.sh 内的指令可以被执行)
+                ( shell.sh 只要有 r 的权限即可被执行)
+
+            撰写方法：
+                第一行 #!/bin/bash 在宣告这个 script 使用的 shell 名称;
+                程序内容的说明:，除了第一行的“ #! ”是用来宣告 shell 的之外，其他的 # 都是“注解”用途;
+                主要环境变量的宣告：务必要将一些重要的环境变量设置好;
+                主要程序部分:议务必要将一些重要的环境变量设置好;
+                执行成果告知(定义回传值):利用 exit 这个指令来让程序中断，并且回传一个数值给系统;
+
+        判断式：
+            利用test指令的测试功能：
+                标志：
+                    关于某个文件名的“文件类型”判断：
+                        -e 该“文件名”是否存在？（常用） 
+                        -f 该“文件名”是否存在且为文件（file）？（常用） 
+                        -d 该“文件名”是否存在且为目录（directory）？（常用） 
+                        -b 该“文件名”是否存在且为一个 block device 设备？ 
+                        -c 该“文件名”是否存在且为一个 character device 设备？ 
+                        -S 该“文件名”是否存在且为一个 Socket 文件？ 
+                        -p 该“文件名”是否存在且为一个 FIFO （pipe） 文件？ 
+                        -L 该“文件名”是否存在且为一个链接文件？
+
+                    关于文件的权限侦测：
+                        -r 侦测该文件名是否存在且具有“可读”的权限？ 
+                        -w 侦测该文件名是否存在且具有“可写”的权限？ 
+                        -x 侦测该文件名是否存在且具有“可执行”的权限？ 
+                        -u 侦测该文件名是否存在且具有“SUID”的属性？ 
+                        -g 侦测该文件名是否存在且具有“SGID”的属性？ 
+                        -k 侦测该文件名是否存在且具有“Sticky bit”的属性？ 
+                        -s 侦测该文件名是否存在且为“非空白文件”？
+
+                    两个文件之间的比较：
+                        -nt （newer than）判断 file1 是否比 file2 新 
+                        -ot （older than）判断 file1 是否比 file2 旧 
+                        -ef 判断 file1 与 file2 是否为同一文件，可用在判断 hard link 的判定上,主要意义在判定，两个文件是否均指向同一个 inode；
+
+                    关于两个整数之间的判定：
+                        -eq 两数值相等 （equal） 
+                        -ne 两数值不等 （not equal） 
+                        -gt n1 大于 n2 （greater than） 
+                        -lt n1 小于 n2 （less than）
+                        -ge n1 大于等于 n2 （greater than or equal）
+                        -le n1 小于等于 n2 （less than or equal）
+
+                    判定字串的数据：
+                        test -z string 判定字串是否为 0 ？若 string 为空字串，则为 true ；
+                        test -n string 判定字串是否非为 0 ？若 string 为空字串，则为 false,-n 可省略；
+                        test str1 == str2 判定 str1 是否等于 str2 ，若相等，则回传 true；
+                        test str1 != str2 判定 str1 是否不等于 str2 ，若相等，则回传 false；
+
+                    多重条件判定：
+                    -a （and）两状况同时成立！例如 test -r file -a -x file，则 file 同时具有 r 与 x 权限时，才回传 true；
+                    -o （or）两状况任何一个成立！例如 test -r file -o -x file，则 file 具有 r 或 x 权限时，就可回传 true； 
+                    ! 反相状态，如 test ! -x file ，当 file 不具有 x 时，回传 true ；
+                
+                利用判断符号[]：
+                    中括号的两端需要有空白字符来分隔；
+                    在中括号 [] 内的每个元件都需要有空白键来分隔；
+                    在中括号内的变量，最好都以双引号括号起来；
+                    在中括号内的常数，最好都以单或双引号括号起来；
+
+                shell script的默认变量：
+                $# ：代表后接的参数“个数”，以上表为例这里显示为“ 4 ”； 
+                $@ ：代表“ "$1" "$2" "$3" "$4" ”之意，每个变量是独立的（用双引号括起来）； 
+                $* ：代表“ "$1c$2c$3c$4" ”，其中 c 为分隔字符，默认为空白键， 所以代表“ "$1 $2 $3 $4" ”；
+
+
+            条件判断式：
+                条件判断式可使用 if...then 来判断，若是固定变量内容的情况下，可使用 case $var in ... esac 来处理；
+                
+                利用if...then
+                    单层、简单条件判断式：
+                        语法:if [条件判断式]; then 
+                                当条件判断式成立时，可以进行的指令工作内容； 
+                            fi     #将 if 反过来写，就成为 fi ,结束 if 之意；
+                        
+                        && 代表 AND ； 
+                        || 代表 or ；
+
+                    多重、复杂条件判断式：
+                        语法： if [条件判断式]; then 
+                                当条件判断式成立时，可以进行的指令工作内容； 
+                            else 
+                                当条件判断式不成立时，可以进行的指令工作内容； 
+                            fi   
+                        
+                        利用参数的方法依序设计:
+                            判断 $1 是否为 hello，如果是的话，就显示 "Hello, how are you ?"；
+                            如果没有加任何参数，就提示使用者必须要使用的参数下达法； 
+                            而如果加入的参数不是 hello ，就提醒使用者仅能使用 hello 为参数；
+
+                        常见的port与网络服务的关系：
+                            80： WWW 
+                            22： ssh 
+                            21： ftp 
+                            25： mail 
+                            111： RPC（远端程序调用） 
+                            631： CUPS（打印服务功能）
+
+                利用case...esac判断：
+                    语法:case $变量名称 in      #关键字为 case ，还有变量前有钱字号 
+                            "第一个变量内容"）      #每个变量内容建议用双引号括起来，关键字则为小括号；
+                        程序段 
+                        ;;         #每个类别结尾使用两个连续的分号来处理； 
+                        "第二个变量内容"） 
+                        程序段 
+                        ;;
+                        *）      #最后一个变量内容都会用 * 来代表所有其他值不包含第一个变量内容与第二个变量内容的其他程序执行段；
+                        exit 1 
+                        ;; 
+                        esac   #最终的 case 结尾反过来写;
+
+                        #语法以 case (实际案例之意)为开头，结尾自然就是将 case 的英文反过来写,就成为 esac；
+                        #每一个变量内容的程序段最后都需要两个分号(;;)来代表该程序段落的结束；
+
+                    "$变量"取得的方式： 
+                        直接下达式：利用“ script.sh variable ” 的方式来直接给予 $1 变量的内容，在 /etc/init.d 目录下大多数程序的设计方式； 
+                        互动式：通过 read 指令来让使用者输入变量的内容；
+
+                
+                利用function功能：
+                    语法：
+                        function fname () {
+                        程序段
+                        }
+                        #因为shell script的执行方式是由上而下，由左而右， 因此在shell script当中的function的设置
+                        一定要在程序的最前面， 这样才能够在执行时被找到可用的程序段；
+                        # function 也是拥有内置变量的,内置变量与 shell script 很类似，函数名称代表示 $0 ，而后续接
+                        的变量也是以 $1, $2... 来取代的；
+        
+        循环(loop)：
+            循环可以不断的执行某个程序段落，直到使用者设置的条件达成为止；
+            循环主要分为不定循环（while, until）以及固定循环（for），配合 do， done 来达成所需任务；
+            
+            while do done,until do done (不定循环)：
+                状态：
+                    while [ condition ]    #中括号内的状态就是判断式 
+                    do     #do 是循环的开始；
+                    程序段落 
+                    done   #done 是循环的结束；
+                    #“当 condition 条件成立时，就进行循环，直到 condition 的条件不成立才停止；
+
+                    until [ condition ] 
+                    do
+                    程序段落 
+                    done
+                    #当 condition 条件成立时，就终止循环，否则就持续进行循环的程序段；
+
+            for ... do ... done(固定循环)：
+                语法：
+                    for var in con1 con2 con3 ... 
+                    do
+                    程序段 
+                    done
+                
+                $var 的变量内容在循环工作时： 
+                    第一次循环时， $var 的内容为 con1 ； 
+                    第二次循环时， $var 的内容为 con2 ； 
+                    第三次循环时， $var 的内容为 con3 ； 
+                    ....
+
+            for ... do ... done的数值处理：
+                语法:
+                    for ((初始值；限制值；执行步阶))
+                    do
+                        程序段 
+                    done 
+                    
+                    #初始值：某个变量在循环当中的起始值，直接以类似 i=1 设置好； 
+                    #限制值：当变量的值在这个限制值的范围内，就继续进行循环,例如 i<=100； 
+                    #执行步阶：每作一次循环时，变量的变化量。例如 i=i+1；
+
+
+        shell script 的追踪与debug：
+            使用 sh -x script.sh 来进行程序的 debug
+            
+            语法：
+                $ sh [-nvx] scripts.sh 
+            
+            选项与参数： 
+                -n：不要执行 script，仅查询语法的问题； 
+                -v：再执行 sccript 前，先将 scripts 的内容输出到屏幕上； 
+                -x：将使用到的 script 内容显示到屏幕上，这是很有用的参数；
+
+            例一：测试 dir_perm.sh 有无语法的问题：
+                $ sh -n dir_perm.sh     # 若语法没有问题，则不会显示任何信息；
+
+            #在加号后面的数据其实都是指令串，由于sh -x的方式来将指令执行过程也显示出来， 
+            如此使用者可以判断程序码执 行到哪一段时会出现相关的信息；
+
+
+
+
+
+
+
+    
+
+    
+    

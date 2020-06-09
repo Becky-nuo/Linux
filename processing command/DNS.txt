@@ -1,0 +1,75 @@
+DNS：
+    DNS空间结构：
+        Root Domain(根域)
+        Top-level Domain(顶级域)
+        subdomain(子域)
+
+    DNS查询模式：
+        迭代查询:DNS 服务器会向客户机提供其他能够解析查询请求的DNS 服务器地址，
+            当客户机发送查询请求时，DNS 服务器并不直接回复查询结果，而是告诉客户
+            机另一台DNS 服务器地址，客户机再向这台DNS 服务器提交请求，依次循环直
+            到返回查询的结果.
+        递归查询:是一种DNS 服务器的查询模式，在该模式下DNS 服务器接收到客户机请求，
+            必须使用一个准确的查询结果回复客户机。如果DNS 服务器本地没有存储查询DNS
+            信息，那么该服务器会询问其他服务器，并将返回的查询结果提交给客户机。
+    安装：
+        检查是否已安装：rpm -q bing
+        安装Bind软件：yum install bing
+            (安装完成后会在/etc目录下生成dns的配置named文件名称为)
+
+        修改主要配置文件named.conf：
+            vim /etc/named.conf:
+                listen-on port 53 { xxx.xxx.xxx.x}是对本机地址通信，填写DNS服务器IP
+                allow-query {any}是允许所有IP进行查询，也可以直接加注释去掉
+
+        修改数据存储位置配置文件：
+            vim /etc/named.rfc1912.zones:
+                zone 'admin.com' IN{
+                    type master;
+                    file 'admin.com';
+                    allow-update {none;};
+                };
+                zone '192.168.134.in-addr.arpa' IN{
+                    type master;
+                    file 'admin.loopback';
+                    allow-update {none;};
+                };
+
+        修改正向解析文件：
+            cp /var/named/named.localhost /var/named/admin.com.zone
+            vim /var/named/ admin.com.zone:
+                $TTL 1D
+                @	IN SOA	admin.com. root.admin.com. (
+				                            22	; serial
+				                            1D	; refresh
+				                            1H	; retry
+				                            1W	; expire
+				                            3H )	; minimum
+                NS	admin.com.
+                MX	5	mail.admin.com
+                IN	A	127.0.0.1
+                IN	AAAA	::1
+
+        修改反向解析文件：
+            cd /var/named/named.loopback /var/named/192.168.134.arpa
+            vim /var/named/(ip).arpa:
+                $TTL 1D
+                @	IN SOA	admin.com. root.admin.com. (
+                                            33	; serial
+                                            1D	; refresh
+                                            1H	; retry
+                                            1W	; expire
+                                            3H )	; minimum
+                NS	admin.com.
+                MX	5	mail.admin.com   
+                IN	A	127.0.0.1
+                IN	AAAA	::1
+
+        修改文件的权限：chmod 755 /etc/named.conf 
+
+        启动服务：service named start
+
+        开机自启动：chkconfig named on 
+
+
+

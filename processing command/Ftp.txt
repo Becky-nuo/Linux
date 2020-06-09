@@ -1,0 +1,70 @@
+安装ftp主键：
+    安装vsftpd组件：
+        yum -y install vsftpd
+
+    添加一个ftp用户：
+        usseradd ftpuser:
+            这样一个用户建完，可以用这个登录，记得用普通登录不要用匿名了。
+            登录后默认的路径为 /home/ftpuser.
+
+    
+    给ftp用户添加密码：
+        passwd ftpuser 
+            输入两次密码后修改密码.
+
+    防火墙开启21端口：
+        vim /etc/sysconfig/iptables:
+            (centos默认是没有开启的，所以要修改iptables文件)
+            (在行上面有22 -j ACCEPT 下面另起一行输入跟那行差不多的，只是把22换成21，然后：wq保存。)
+        
+        重启iptables:   service iptables restart
+
+
+    修改selinux:
+        第一种方法：
+            修改selinux：getsebool -a |grep ftp
+                allow_ftpd_anon_write --> off
+
+                allow_ftpd_full_access --> off      -->on
+                
+                allow_ftpd_use_cifs --> off
+                allow_ftpd_use_nfs --> off
+                
+                ftp_home_dir --> off                -->on
+                
+                ftpd_connect_db --> off
+                ftpd_use_passive_mode --> off
+                httpd_enable_ftp_server --> off
+                tftp_anon_write --> off
+                    (两行都是off，代表，没有开启外网的访问)
+            执行以下命令：
+                setsebool -p allpw_ftpd_full_access on
+                setsebool -p ftp_home_dir on
+
+    
+        第二种方法：
+            直接关闭:   setenforce 0
+
+
+    关闭匿名访问：
+        修改/etc/vsftpd/vsftpd.conf文件
+            anonymous_enable=yes --> no
+
+        重启ftp服务：
+            service vsftpd restart / systemctl start vsftpd vsftpd.service
+
+
+    开启被动模式：
+        打开vsftpd.conf文件,在后面加上：
+            pasv_min_port=30000
+            pasv_max_port=30999
+            (表示端口范围为30000~30999，这个可以随意改)
+        重启vsftpd: service vsftpd restart
+
+        由于指定这段端口范围,iptables也要相应的开启这个范围,所以像上面那样打开iptables文件。
+        在21上下面另起一行,更那行差不多,只是把21改为30000:30999,然后:wq保存，
+        
+        重启iptables: service iptables rester
+
+
+    设置开机启动Vsftpd ftp 服务：chkconfig vsftpd on

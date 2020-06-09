@@ -1,0 +1,123 @@
+SELinux 初探：
+    含义：Security Enhanced Linux ”的缩写，字面上的意义就是安全强化的 Linux 之意；
+    功能：SELinux 当初的设计是为了避免使用者资源的误用，而 SELinux 使用的是 MAC 委任式存取设置；
+    
+    特点：
+        SELinux是个非常完备的核心模块；
+        CentOS 提供了很多管理 SELinux 的指令与机制，因此在整体架构上面是单纯且容易操作管理的；
+
+    当初设计的目标：避免资源的误用 
+        通常系统出现问题的原因大部分都在于'内部员工的资源误用'所导致的，实际由外部发动的攻击反而没有这么严重；
+
+        SELinux 是在进行程序、文件等细部权限设置依据的一个核心模块，由于启动网络服务的也是程序， 
+        因此刚好也能够控制网络服务能否存取系统资源的一道关卡；
+    
+    
+    传统的文件权限与帐号关系：自主式存取控制, DAC  
+        存取文件系统的方式被称为“自主式存取控制(Discretionary Access Control, DAC)”，
+        基本上，就是依据程序的拥 有者与文件资源的 rwx 权限来决定有无存取的能力;
+
+        DAC 的存取控制有几个困扰：
+            root 具有最高的权限；
+            使用者可以取得程序来变更文件资源的存取权限；
+    
+    
+    SELinux的运行模式:
+        主体(Subject)：主要想要管理的就是程序，因此你可以将“主体”跟本章谈到的 process 划上等号；
+        目标(Object) ：主体程序能否存取的“目标资源”一般就是文件系统,因此这个目标项目可以等文件系统划上等号；
+        政策：(Policy) ：由于程序与文件数量庞大，因此 SELinux 会依据某些服务来制订基本的存取安全性政策；
+            targeted：针对网络服务限制较多，针对本机限制较少，是默认的政策； 
+            minimum：由 target 修订而来，仅针对选择的程序来保护； 
+            mls：完整的 SELinux 限制，限制方面较为严格；
+        
+        安全性本文(security context)：主体与目标的安全性本文必须一致才能够顺利存取；
+        安全性本文的一般设置为：“Identify:role:type”其中又以 type 最重要；
+        
+        流程：
+            1. 首先，我们触发一个可执行的目标文件，那就是具有 crond_exec_t 这个类型的 /usr/sbin/crond 文件； 
+            
+            2. 该文件的类型会让这个文件所造成的主体程序(Subject)具有 crond 这个领域(domain),我们的政策针对这
+            个领域已经制定了许多规则，其中包括这个领域可以读取的目标资源类型； 
+            
+            3. 由于 crond domain 被设置为可以读取 system_cron_spool_t 这个类型的目标文件(Object),因此你的配置
+            文件放到 /etc/cron.d/ 目录下，就能够被 crond 那支程序所读取了； 
+            
+            4. 但最终能不能读到正确的数据，还得要看 rwx 是否符合 Linux 权限的规范；
+
+    
+    SELinux 的三种模式：
+        enforcing：强制模式，代表 SELinux 运行中，且已经正确的开始限制 domain/type 了； 
+        permissive：宽容模式，代表 SELinux 运行中，不过仅会有警告讯息并不会实际限制 domain/type 的存取，这种模式可以运来作为 SELinux 的 debug 之用； 
+        disabled：关闭，SELinux 并没有实际运行；
+
+    
+    SELinux 的启动、关闭：
+        语法:$ setenforce [0|1] 
+        选项与参数： 
+            0 ：转成 permissive 宽容模式； 
+            1 ：转成 Enforcing 强制模式；
+        启动的政策(Policy)主要是 targeted；
+        配置文件在： /etc/selinux/config
+
+    
+    SELinux 的观察：
+        语法：$ sestatus [-vb] 
+        选项与参数： 
+            -v ：检查列于 /etc/sestatus.conf 内的文件与程序的安全性本文内容； 
+            -b ：将目前政策的规则布林值列出，亦即某些规则(rule)是否要启动(0/1)之意；
+
+    
+    SELinux 政策内的规则管理：
+        语法：$ getsebool [-a] [规则的名称] 
+        选项与参数： 
+            -a ：列出目前系统上面的所有 SELinux 规则的布林值为打开或关闭值；
+
+        
+        语法：$ seinfo [-Atrub] 
+        选项与参数： 
+            -A ：列出 SELinux 的状态、规则布林值、身份识别、角色、类别等所有信息 ；
+            -u ：列出 SELinux 的所有身份识别(user)种类 ；
+            -r ：列出 SELinux 的所有角色(role)种类 ；
+            -t ：列出 SELinux 的所有类别(type)种类 ；
+            -b ：列出所有规则的种类(布林值)；
+
+        
+        语法：$ sesearch [-A] [-s 主体类别] [-t 目标类别] [-b 布林值] 
+        选项与参数： 
+            -A ：列出后面数据中，允许“读取或放行”的相关数据
+            -t ：后面还要接类别，例如 -t httpd_t 
+            -b ：后面还要接SELinux的规则，例如 -b httpd_enable_ftp_server
+
+        修改 SELinux 规则的布林值 setsebool :
+            含义：$ setsebool [-P] “规则名称” [0|1] 
+            选项与参数： 
+                -P ：直接将设置值写入配置文件，该设置数据未来会生效的；
+        
+    SELinux 安全本文的修改：
+        使用 chcon 手动修改文件的 SELinux type
+            语法:   $ chcon [-R] [-t type] [-u user] [-r role] 文件 
+                    $ chcon [-R] --reference=范例档 文件 
+            选项与参数： 
+                -R ：连同该目录下的次目录也同时修改； 
+                -t ：后面接安全性本文的类型字段,如 httpd_sys_content_t ； 
+                -u ：后面接身份识别，例如 system_u； 
+                -r ：后面街角色，例如 system_r； 
+                -v ：若有变化成功，请将变动的结果列出来 ；
+                ——reference=范例档：拿某个文件当范例来修改后续接的文件的类型；
+            重设 SELinux 的安全性本文可使用 restorecon 与 chcon；
+
+        
+        使用restorecon 让文件恢复正确的SELinux type ：
+            语法：$ restorecon [-Rv] 文件或目录 
+            选项与参数： 
+                -R ：连同次目录一起修改； 
+                -v ：将过程显示到屏幕上；
+
+        
+        semanage 默认目录的安全性本文查询与修改：
+            语法：$ semanage fcontext -{a|d|m} [-frst] file_spec 
+            选项与参数： 
+                fcontext ：主要用在安全性本文方面的用途，-l 为查询的意思； 
+                -a ：增加的意思，你可以增加一些目录的默认安全性本文类型设置； 
+                -m ：修改的意思； 
+                -d ：删除的意思；

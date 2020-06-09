@@ -1,0 +1,200 @@
+变量键盘读取、阵列与宣告：
+    read：读取来自键盘输入的变量；
+        语法：$ read [-pt] variable 
+        选项与参数： 
+                -p ：后面可以接提示字符！ 
+                -t ：后面可以接等待的“秒数！”这个比较有趣～不会一直等待使用者啦！ 
+                
+        例一：让使用者由键盘输入一内容，将该内容变成名为 atest 的变量；
+            $ read atest This is a test   #此时光标会等待你输入！请输入左侧文字看看；
+            $ echo ${atest} This is a test      #你刚刚输入的数据已经变成一个变量内容！ 
+        
+        例二：提示使用者 30 秒内输入自己的大名，将该输入字串作为名为 named 的变量内容；
+            $ read -p "Please keyin your name: " -t 30 named  #注意，会有提示字符； 
+            $ echo ${named} 
+                VBird Tsai          #输入的数据又变成一个变量的内容；
+            (read 之后不加任何参数，直接加上变量名称)
+
+    
+    declare / typeset:  宣告变量的类型；
+        语法：$ declare [-aixr] variable 
+        选项与参数：
+                -a ：将后面名为 variable 的变量定义成为阵列 （array） 类型；
+                -i ：将后面名为 variable 的变量定义成为整数数字 （integer） 类型； 
+                -x ：用法与 export 一样，就是将后面的 variable 变成环境变量； 
+                -r ：将变量设置成为 readonly 类型，该变量不可被更改内容，也不能 unset； 
+                
+            例一：让变量sum 进行 100+300+50 的加总结果；
+                $ sum=100+300+50 
+                $ echo ${sum} 100+300+50    #没有计算加总，因为文字体态的变量属性；
+                $ declare -i sum=100+300+50 
+                $ echo ${sum} 
+                    450         #???
+            
+                (变量类型默认为“字串”，所以若不指定变量类型，则 1+2 为一个“字串”而不是“计算式”;)
+                (bash 环境中的数值运算，默认最多仅能到达整数形态，所以 1/3 结果是 0；)
+
+            例二：将 sum 变成环境变量：
+            $ declare -x sum 
+            $ export | grep sum 
+                declare -ix sum="450"   #有 i 与 x 的宣告； 
+                
+            例三：让 sum 变成只读属性，不可更动：
+            $ declare -r sum 
+            $ sum=tesgting 
+                -bash: sum: readonly variable       #不能改这个变量；
+            
+            例四：让 sum 变成非环境变量的自订变量： 
+            $ declare +x sum        #将 - 变成 + 可以进行“取消”动作 ；
+            $ declare -p sum        #-p 可以单独列出变量的类型;
+                declare -ir sum="450"       #只剩下 i, r 的类型，不具有 x ；
+            
+
+    
+    阵列(array)变量类型：使用阵列来宣告一些变量；
+        阵列的设置方式：var[index]=content;
+        
+        例一：设置上面提到的 var[1] ～ var[3] 的变量；
+            $ var[1]="small min" 
+            $ var[2]="big min" 
+            $ var[3]="nice min" 
+            $ echo "${var[1]}, ${var[2]}, ${var[3]}" 
+                small min, big min, nice min
+        (阵列的变量类型在于'读取'，建议直接以${阵列}的方式来读取)
+
+    
+     与文件系统及程序的限制关系：ulimit
+        bash 是可以“限制使用者的某些系统资源”的，包括可以打开的文件 数量， 
+        可以使用的 CPU 时间，可以使用的内存总量等;
+        
+        语法：$ ulimit [-SHacdfltu] [配额] 
+        选项与参数： 
+                -H ：hard limit ，严格的设置，必定不能超过这个设置的数值； 
+                -S ：soft limit ，警告的设置，可以超过这个设置值，但是若超过则有警告讯息;
+                -a ：后面不接任何选项与参数，可列出所有的限制额度； 
+                
+                -c ：当某些程序发生错误时，系统可能会将该程序在内存中的信息写成文件(除错用),
+                    这种文件就被称为核心文件（core file）。此为限制每个核心文件的最大容量;
+                
+                -f ：此 shell 可以创建的最大文件大小（一般可能设置为 2GB）单位为 KBytes; 
+                -d ：程序可使用的最大断裂内存（segment）容量； -l ：可用于锁定 （lock） 的内存量 ;
+                -t ：可使用的最大 CPU 时间 （单位为秒）; 
+                -u ：单一使用者可以使用的最大程序（process）数量;
+
+            (想要复原 ulimit 的设置最简单的方法就是登出再登陆，否则就是得要重新以 ulimit 设置才行)
+            (如果以 ulimit 设置了 -f 的文件大小， 那么“只能继续减小文件大小，不能增加文件大小)
+
+
+变量内容的删除与取代：
+    ${variable#/*local/bin:} #上面的特殊字体部分是关键字,用在这种删除模式所必须存在的;
+    ${variable#/*local/bin:} #这就是原本的变量名称，以例二来说，这里就填写 path 这个“变量名称”;
+    ${variable#/*local/bin:} #代表“从变量内容的最前面开始向右删除”，且仅删除最短的那个;
+    ${variable#/*local/bin:} #代表要被删除的部分，由于 # 代表由前面开始删除，所以这里便由开始的 / 写起; 
+
+    例一：先让小写的 path 自订变量设置的与 PATH 内容相同 
+        $ path=${PATH} 
+        $ echo ${path}
+
+    例二：将前1个目录删除掉(local/bin)，如何显示:
+    $ echo ${path#/*local/bin:} 
+        /usr/bin:...
+
+    例三：要删除前面所有的目录，仅保留最后一个目录：
+        $ echo ${path#/*:}
+
+    例四：删除最后面那个目录，从 : 到 bin 为止的字串：
+        $ echo ${path%:*bin}
+
+    例五：保留第一个目录：
+        $ echo ${path%%:*bin}
+
+    例六：将 path 的变量内容内的 sbin 取代成大写 SBIN：
+        $ echo ${path/sbin/SBIN}
+
+    
+    ${变量#关键字}: 若变量内容从头开始的数据符合“关键字”，则将符合的最短数据删除;
+    ${变量##关键字}:若变量内容从头开始的数据符合“关键字”，则将符合的最长数据删除; 
+    
+    ${变量%关键字}: 若变量内容从尾向前的数据符合“关键字”，则将符合的最短数据删除;
+    ${变量%%关键字}: 若变量内容从尾向前的数据符合“关键字”，则将符合的最长数据删除;
+    
+    ${变量/旧字串/新字串}:若变量内容符合“旧字串”则“第一个旧字串会被新字串取代”;
+    ${变量//旧字串/新字串}:若变量内容符合“旧字串”则“全部的旧字串会被新字串取代”;
+
+
+变量的测试与内容替换：
+    
+    例一：测试一下是否存在 username 这个变量，若不存在则给予 username 内容为 root； 
+        $ echo ${username}  #由于出现空白，所以 username 可能不存在，也可能是空字串；
+        $ username=${username-root} 
+        $ echo ${username} root     #因为 username 没有设置，所以主动给予名为 root 的内容。 
+        $ username="vbird tsai"     #主动设置 username 的内容；
+        $ username=${username-root} 
+        $ echo ${username} vbird tsai   #因为 username 已经设置了，所以使用旧有的设置而不以 root 取代
+
+
+    ew_var=${old_var-content}       #新的变量，主要用来取代旧变量，新旧变量名称是一样的；
+    Tips new_var=${old_var-content}     #关键字部分，必须要存在； 
+    new_var=${old_var-content}          #旧的变量，被测试的项目； 
+    new_var=${old_var-content}          #变量的“内容”，是在“给予未设置变量的内容；
+    (大括号内有没有冒号“ : ”的差别是很大的,加上冒号后，被测试的变量未被设置或者是已被设置为空字串时,
+        都能够用后面的内容来替换与设置)
+
+    命令别名设置：alias、unalias
+    
+    历史命令：history
+        $ history [n]
+        $ history [-c]
+        $ history [-raw] histfiles 
+        选项与参数： 
+                n ：数字，意思是“要列出最近的 n 笔命令列表”的意思！ 
+                -c ：将目前的 shell 中的所有 history 内容全部消除 
+                -a ：将目前新增的 history 指令新增入 histfiles 中，若没有加 histfiles ， 则默认写入 ~/.bash_history 
+                -r ：将 histfiles 的内容读到目前这个 shell 的 history 记忆中； 
+                -w ：将目前的 history 记忆内容写入 histfiles 中！ 
+                
+        例一：列出目前内存内的所有 history 记忆;
+            $ history  
+                1017 man bash 1018 ll 1019 history 1020 history 
+                    # 列出的信息当中，共分两栏，第一栏为该指令在这个 shell 当中的代码， 
+                    # 另一个则是指令本身的内容,至于会出哪些指令记录，则与 HISTSIZE 有关; 
+                    
+        例二：列出目前最近的 3 笔数据
+            $ history 3 
+                1019 history 
+                1020 history 
+                1021 history 3 
+                
+        例三：立刻将目前的数据写入 histfile 当中
+            $ history -w        # 在默认的情况下，会将历史纪录写入 ~/.bash_history 当中;
+            $ echo ${HISTSIZE} 
+                1000            
+                
+                
+        历史命令的读取与记录： 
+            当我们以 bash 登陆 Linux 主机之后，系统会主动的由主文件夹的 ~/.bash_history 读取以前曾经下过的指令，
+            那么 ~/.bash_history 会记录几笔数据,这就与你 bash 的 HISTFILESIZE 这个变量设置值有关了; 
+            
+            假设我这次登陆主机后，共下达过 100 次指令，“等我登出时， 系统就会将 101~1100 这总共 1000 笔历史命令更
+            新到 ~/.bash_history 当中。” 也就是说，历史命令在我登出时，会将最近的 HISTFILESIZE 笔记录到我的纪录档当中; 
+            
+            当然，也可以用 history -w 强制立刻写入的！那为何用“更新”两个字,因为 ~/.bash_history 记录的笔数永远都是 
+            HISTFILESIZE 那么多，旧的讯息会被主动的拿掉！ 仅保留最新的！ 那么 history 这个历史命令不只是查询命令而已
+            可以利用相关的功能来帮我们执行命令，比如下面的例四：
+                
+            例四：  $ !number
+                    $ !command 
+                    $ !! 
+                    选项与参数： 
+                        number ：执行第几笔指令的意思； 
+                        command ：由最近的指令向前搜寻“指令串开头为 command”的那个指令，并执行； 
+                        !! ：执行上一个指令（相当于按↑按键后，按 Enter）； 
+                        
+                    $ history 
+                        66 man rm 
+                        67 alias 
+                        68 man history 
+                        69 history 
+                    $ !66       #执行第 66 笔指令； 
+                    $ !!        #执行上一个指令,本例中亦即；
+                    $ !al       #执行最近以 al 为开头的指令(第67个)；

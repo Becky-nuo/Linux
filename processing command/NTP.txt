@@ -1,0 +1,61 @@
+NTP：
+    作用：
+        使网络中的各个计算机时间同步的一种协议。它的用途是把计算机
+    的时钟同步到世界协调时UTC，其精度在局域网内可达0.1ms，在互联网上绝
+    大多数的地方其精度可以达到1-50ms。
+    
+    
+    安装：
+    yum install -y ntp
+    cp  /etc/ntp.conf  /etc/ntp.conf.c
+    
+    vi  /etc/ntp.conf
+    清空原来的内容，添加以下内容：
+        
+        driftfile /var/lib/ntp/drift
+        restrict default kod nomodify notrap nopeer noquery
+        restrict -6 default kod nomodify notrap nopeer noquery
+        restrict 127.0.0.1
+        restrict -6 ::1
+        
+        允许内网其他机器同步时间
+        restrict 172.16.1.0 mask 255.255.255.0 nomodify notr
+        #server 0.centos.pool.ntp.org iburst
+        #server 1.centos.pool.ntp.org iburst
+        #server 2.centos.pool.ntp.org iburst
+        #server 3.centos.pool.ntp.org iburst
+        
+        定义使用的上游 ntp服务器，将原来的注释
+        server ntp1.aliyun.com
+        server time1.aliyun.com
+        
+        允许上层时间服务器主动修改本机时间
+        restrict time1.aliyun.com nomodify notrap noquery
+        restrict ntp1.aliyun.com nomodify notrap noquery
+        
+        外部时间服务器不可用时，以本地时间作为时间服务
+        server 127.127.1.0
+        fudge 127.127.1.0 stratum 10
+        includefile /etc/ntp/crypto/pw
+        keys /etc/ntp/keys
+
+    关闭防火墙:service iptables stop
+    启动ntp服务器：service ntpd start
+    设置NTP开机自动启动：chkconfig ntpd on
+    查看NTP是否正常运行：netstat -tlunp | grep ntp
+
+    ntpq -p各个选项相关信息:
+        restrict 控制相关权限。
+        语法为：restrict IP地址 mask 子网掩码 参数,其中IP地址也可以是default,default就是指所有的IP
+        
+        参数：
+            ignore  ：关闭所有的 NTP 联机服务
+            nomodify：客户端不能更改服务端的时间参数，但是客户端可以通过服务端进行网络校时。
+            notrust ：客户端除非通过认证，否则该客户端来源将被视为不信任子网
+            noquery ：不提供客户端的时间查询：用户端不能使用ntpq，ntpc等命令来查询ntp服务器
+            notrap ：不提供trap远端登陆：拒绝为匹配的主机提供模式 6 控制消息陷阱服务。陷阱服务是 
+            ntpdq 控制消息协议的子系统，用于远程事件日志记录程序。
+            nopeer ：用于阻止主机尝试与服务器对等，并允许欺诈性服务器控制时钟
+            kod ： 访问违规时发送 KoD 包。
+            restrict -6 表示IPV6地址的权限设置。
+

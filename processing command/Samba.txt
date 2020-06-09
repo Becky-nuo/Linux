@@ -1,0 +1,158 @@
+Samba：
+    简介：
+        Windows系统提供网络文件共享服务，其使用SMB协议，是Microsoft开发的网络通讯协议；
+        Samba使Linux支持SMB协议，是一套让Linux系统能够应用Microsoft网络通讯协议的软件； 
+        
+        Samba实现了一个网络服务器，用于Linux和Windows文件共享，实际上Samba既可用于Windows和Linux文件共享，
+        也可用于Linux和Linux间文件共享；
+
+    功能：
+        提供Windows操作系统风格的文件和打印机共享，使Windows系统能共享Linux等其他操作系统的资源，
+        外表看起来和共享Windows资源没有区别，并支持Windows客户使用网上邻居浏览网络；
+
+        提供SMB客户功能：利用Samba提供的smbclint程序可以从Linux下以类似于 FTP的方式访问Windows的资源；
+        备份PC上的资源：利用一个叫smbtar的shell 脚本，可以使用 tar 格式备份和恢复一台远程 Windows上的共享文件；
+
+    组成:
+        一个samba服务器实际上包含了两个服务器程序：smbd和nmbd
+
+        Smbd是samba的核心，它负责建立对话进程、验证用户身份、提供对文件系统和打印机的访问机制;
+        
+        Nmbd 用于解析，即把linux机器所共享的工作组及在此工作组下的netbios name解析出来;
+
+
+        Smbclient是一个SMB客户工具，有shell-based用户界面并同FTP有些类似。应用它可以复制其它的SMB服务器资源，
+        还可以访问其它SMB服务器提供的打印机资源;
+
+        Testparm命令用来快速检查smb.conf文件的语法错误,其它工具用来配置samba的加密口令文件、配置用于samba国际化的字符集;
+        
+        Smbstatus 报告当前samba的联接状态;
+
+    安装包：
+        Samba-common-3.5.2-60.fc13.i686
+        Samba-3.5.2-60.fc13.i686
+        Samba-client-3.5.2-60.fc13.i686
+        System-config-samba-1.2.89-1.fc13.noarch 
+
+    
+    安装步骤：
+        1）挂载光驱： mount  /dev/sr0/mnt/cdrom
+        2) cd /mnt/cdrom/Packages
+        3) 安装软件包
+	        #rpm –ivh Samba-common-3.5.2-60.fc13.i686
+	        #rpm –ivh Samba-3.5.2-60.fc13.i686 
+	        #rpm –ivh Samba-client-3.5.2-60.fc13.i686
+	        #rpm – ivh  System-config-samba-1.2.89-1.fc13.noarch 
+
+            安装Samba服务：yum install -y samba  
+                (yum 是在线安装，安装时会自动检测需要的依赖并安装)
+
+            sudo apt-get insall samba      // (sudo get temp root auth)
+            sudo apt-get install smbfs
+
+        4）服务器配置：/etc/samba/smb.conf
+            修改--->security = user
+            文章最后添加：
+                [share]
+                    comment = my share      对该共享资源的说明
+                    path = /home/share      共享资源的路径
+                    valid user = fenxiang   设置允许访问共享的用户或组的列表
+                    writable = yes          指定共享的路径是否可写
+                    browseable = yes        是否可以浏览共享目录
+                    create mode = 0777      指定客户机在共享目录中创建文件的默认权限
+                    directory mode = 0777   指定客户机共享目录中创建文件目录的默认权限
+
+
+        5）关闭selinux服务：
+            setenforce 0 ：
+            （临时关闭，只对当前有效，重启后，该服务又会重新启动。）
+
+            打开selinux配置文件：
+                vi /etc/sysconfig/selinux
+                    将SELINUX=enforcing修改为SELINUX=disabled
+                    （永久关闭selinux）
+
+        6）重启root
+
+
+        7)创建共享目录：
+            在home目录新建共享目录：mkdir /home/share
+            
+            sudochmod 777 /home/john/share
+            
+            说明：john为你的ubuntu的用户名share你可以随便起个名字做为共享文件夹
+
+        8)赋予权限：chmod 777 /home/share  
+
+        9)添加Samba服务器用户：
+            创建普通用户：adduser admin  / passwd
+            将用户添加到Samba服务列表中：smbpasswd -a admin
+                (出现Added user admin表示成功)
+
+
+        10)修改备份Samba配置文件：
+            打开配置文件：vi /etc/samba/smb.conf
+            
+    
+        11)关闭防火墙：
+            关闭防火墙：systemctl stop firewalld
+            关闭防火墙开机启动：systemctl disable firewalld   (可以不关)
+
+
+        12)开启Samba服务：
+            开启服务：systemctl start smb 
+            将服务加入到开机启动中：systemctl enable smb   (可以不开)
+
+    启动或停止Samba服务（在通过Samba共享目录的服务器上必须运行smb服务）：
+        使用以下命令来查看 Samba 守护进程的状态： #service smb status
+        
+        使用以下命令来启动守护进程： #service smb start
+        
+        使用下面的命令来检验Samba服务是否被启动。#pstree | grep mbd
+        
+        使用以下命令来停止守护进程，即停止Samba服务： #service smb stop
+        
+        运行smbd和nmbd：# /usr/sbin/smbd        # /usr/sbin/nmbd
+
+        查看是否已经安装了Samba：rpm -q Samba /yum info samba
+
+    常用命令
+        客户端:
+            Smbclient、smbmount、smbtar
+    
+        服务器端:
+            Smbstatus 、smbd、nmbd、smbpasswd
+
+
+    Linux下Samba服务器的客户端软件:　
+        用户还可以在终端上使用下面的命令来检查服务器所共享的资源:
+            #smbclient –L localhost –U smbuser
+    
+    Samba客户端访问服务器资源:
+        #smbclient //hostname/sharefile –U username
+        
+        其中：
+	        Hostname：Samba服务器的主机名或IP地址；
+	        sharename ：想浏览的共享目录的名称；
+	        Username：系统的 Samba 用户名；
+
+
+    samba服务器状态查看
+        #smbstatus
+        #smbstatus –b
+
+    Linux smbfs文件系统挂载:
+        Mount  -t cifs //ip地址/共享文件夹名  挂载点 –o username=用户名，passwd=密码
+
+    测试：
+        smbclient -L //localhost/share　或者　
+        smbclient -L \\127.0.0.1 -U myname　//这时输入的密码就是你刚才设置的samba密码
+
+    使用：
+        可以到windows下输入ip使用了，在文件夹处输入 "\\" + "Ubuntu机器的ip或主机名" + "\\" + "share"
+        我的即为：\\IP地址\share　
+　　     （share就是刚才smb.conf中的[share]）
+　　　   第一次进入时要输入用户名和密码，这个就是你在第四步中设置的用户名和密码
+
+
+

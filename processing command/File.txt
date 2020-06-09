@@ -1,0 +1,180 @@
+文件处理命令：
+    rmdir:
+        英文原意：remove empty directories
+        执行权限：所有用户
+        路径：/bin/rmdir
+        功能：删除空目录
+        语法：rmdir [目录名]
+
+    touch：
+        英文原意：touch
+        执行权限：所有用户
+        路径：/bin/touch
+        功能：创建空文件
+        语法：touch [文件名]
+
+    cat:
+
+        英文原意：cat
+        执行权限：所有用户
+        路径：/bin/cat
+        功能：显示文件内容
+        语法：cat [文件名]
+                 -n 显示行号  
+
+    more：
+        英文原意：more
+        执行权限：所有用户
+        路径：/bin/more
+        功能：分页显示文件内容
+        语法：more [文件名]
+                （空格）或f   翻页
+                （Enter）    换行
+                q或者Q       退出
+
+    less:
+        英文原意：less
+        执行权限：所有用户
+        路径:/usr/bin/less
+        功能：分页显示文件内容（可向上翻页）
+        语法：less [文件名]
+                   PgUp：上翻
+                   PgDn：下翻 
+             上下箭头一行一行的翻   
+		    /关键词：搜索  n往下搜索 
+
+    head：
+        英文原意：head
+        执行权限：所有用户
+        路径：/usr/bin/head  
+        功能：显示文件前面几行
+        语法：tail [文件名]
+                  -n 指定函数
+
+    tail:
+        英文原意：tail
+        执行权限：所有用户
+        路径：/usr/bin/tail
+        功能：显示文件后面几行
+        语法：tail [文件名]
+                  -n 指定函数
+                  -f 动态显示文件末尾内容
+
+    ln:
+        英文原意：link
+        执行权限：所有用户
+        路径：/bin/ln
+        功能：生成链接文件
+        语法：ln -s [原文件] [目标文件]
+                -s 创建软链接
+
+        硬链接特征：
+                拷贝cp-p+同步更新
+                通过i节点识别
+                不能跨分区
+                不能针对目录使用
+
+文件搜索命令：
+
+    find：
+        find. 表示当前目录查找
+        根据文件名搜索：
+
+            命令：find /etc -name init
+            作用：根据名字查找
+            其他：*   (可以匹配任意字符)
+                ？  (匹配单个字符)	
+
+            命令：find  /etc  -iname  init
+            作用：不区分大小写
+
+            命令：find  /etc  -size  +204800（单位：数据块  512字节  0.5kb）
+            作用：根据文件大小进行查找
+            其他：  +n  (大于)
+                    -n (小于)
+                    n  (等于）
+            
+            命令：find  /home  -user  yerongjie
+            作用：根据所有者查找
+            其他：根据所属组查找  -group
+            
+            命令：find  /etc  -cmin  -5（+表示超过多少时间，-表示多少时间之内）
+            作用：根据时间属性查找(在/etc下查找5分钟内被修改过属性的文件和目录)
+            其他：  -amin  访问时间  access
+                    -cmin  文件属性  change
+                    -mmin 文件内容  modify
+            
+            命令：find  /etc  -size  +163840  -a  -size  -204800
+            作用：多条件查找
+            其他：-a (两个条件同事满足)
+                -o (两个条件满足任意一个即可)
+            查找：在/etc查找文件大于1kb并且文件以.conf结尾。
+            find /etc -size +2 -a -name *.conf
+            
+            命令：find  /etc  -type  f
+            作用：根据文件类型查找
+            其他：  f （文件）
+                    d  (目录）
+                    l  (软链接文件）
+            
+            命令：find  /etc  -name  inittab  -exec  ls  -l  {}  \;
+            作用：在/etc下查找inittab文件并显示其详细信息
+            其他：-exec/-ok 命令 {} \; 对搜索结果执行操作ok会有询问环节
+
+            命令：find  /etc  -inum  65635
+            作用：根据i节点查找
+
+    locate：
+        执行权限：所有用户
+        路径：/usr/bin/locate
+        功能：在文件资料库中查找文件
+        语法：locate  文件名
+        注意事项：手动更新资料库：updatebd
+                /tmp 目录中的文件不会收录进文件资料库
+                locate -i 文件名：不区分大小写
+
+    which:
+        执行权限：所有用户
+        路径：/usr/bin/which
+        功能：搜索命令所在目录及别名信息
+        语法：which  命令
+
+    whereis:
+        执行权限：所有用户
+        路径：/usr/bin/whereis
+        功能：搜索命令所在目录及帮助文档路径
+        语法：whereis [目录名称]
+
+    grep:
+        执行权限：所有用户
+        路径：/bin/grep
+        功能：在文件中搜寻字符串匹配的行并输出
+        语法：grep -iv [指定字符串] [文件]
+                -i   (不区分大小写)
+                -v   (排除指定字符串)
+
+    man:
+        英文原意：manual
+        执行权限：所有用户
+        路径：/usr/bin/man
+        功能：获得帮助的信息
+        语法：man [命令或配置文件]
+        范例：$  man ls      (查看ls命令的帮助信息)
+            $ man services  (查看配置文件service的帮助信息) 
+
+
+    whatis :
+        命令名称:apropos  配置文件名
+        查看命令选项:touch  --help
+        内置命令help 内置命令
+
+
+    添加用户：useradd 用户名
+    修改密码：passwd 用户名
+    查看当前登录用户信息：who
+    查看当前登录用户详细信息：w
+    查看系统已经运行时间：uptime
+
+
+
+

@@ -1,0 +1,85 @@
+Quota:
+    常遇到的情况：
+        针对 WWW server ，如：每个人的网页空间的容量限制;
+        针对 mail server，如：每个人的邮件空间限制;
+        针对 file server，如：每个人最大的可用网络硬盘空间(教学环境中最常见);
+
+    用途：
+        限制某一群组所能使用的最大磁盘配额(使用群组限制);
+        限制某一使用者的最大磁盘配额(使用使用者限制);
+        限制某一目录(directory, project)的最大磁盘配额;
+
+    使用限制：
+        在 EXT 文件系统家族仅能针对整个 filesystem;
+        核心必须支持 quota;
+        只对一般身份使用者有效;
+        若启用 SELinux，非所有目录均可设置 quota;
+
+    规范设置项目：
+        分别针对使用者、群组或个别目录(user, group & project):
+            XFS 文件系统的quota限制中，主要是针对群组、个人或单独的目录进行磁盘使用率的限制;
+            群组(group)的限制与目录(directory/project)无法同时并存;
+        
+        容量限制或文件数量限制(block 或 inode):
+            限制inode用量：可以管理使用者可以创建的“文件数量”; 
+            限制block用量：管理使用者磁盘容量的限制，较常见为这种方式;
+        
+        柔性劝导与硬性规定(soft/hard):
+            hard:表示使用者的用量绝对不会超过这个限制值;
+            soft:表示使用者在低于soft限值时，可以正常使用磁盘;
+
+        会倒数计时的宽限时间(grace time):
+            soft 限制值会即刻取代 hard 限值来作为 quota 的限制;
+    
+    Quota流程:
+        文件系统的支持与观察：
+            不要在根目录下面进行 quota 设计;
+            uquota/usrquota/quota：针对使用者帐号的设置;
+            gquota/grpquota：针对群组的设置;
+            pquota/prjquota：针对单一目录的设置，但是不可与 grpquota 同时存在;
+            修改完 /etc/fstab 后，要测试一下，因为这个文件如果修改错误，会造成无法开机完全的情况;
+        
+        观察quota报告数据：
+            语法：$ xfs_quota -x -c "指令" [挂载点] 
+            选项与参数： 
+                -x ：专家模式，后续才能够加入 -c 的指令参数喔！ 
+                -c ：后面加的就是指令，这个小节我们先来谈谈数据回报的指令 
+                指令：
+                    print:单纯的列出目前主机内的文件系统参数等数据;
+                    df:与原本的 df 一样的功能，可以加上 -b(block) -i(inode) -h(加上单位)等;
+                    report:列出 quota 的项目，有 -ugr(user/group/project)和-bi等数据; 
+                    state:说明目前支持 quota 的文件系统的信息，有没有起动相关项目等;
+        
+        限制值设置方式：
+            语法:$ xfs_quota -x -c "limit [-ug] b[soft|hard]=N i[soft|hard]=N name" 
+                 $ xfs_quota -x -c "timer [-ug] [-bir] Ndays" 
+            选项与参数： 
+                limit ：实际限制的项目，可以针对 user/group 来限制，限制的项目有: 
+                    bsoft/bhard : block 的 soft/hard 限制值，可以加单位;
+                    isoft/ihard : inode 的 soft/hard 限制值; 
+                    name : 就是用户/群组的名称; 
+                timer:用来设置 grace time 的项目,也可以针对 user/group 以及 block/inode 设置;
+        
+        project的限制：针对目录限制(Optional):
+            修改 /etc/fstab 内的文件系统支持参数:
+                将 grpquota 的参数取消，然后加入 prjquota，并且卸载 /home 再重新挂载才行;
+            
+            规范目录、专案名称（project）与专案 ID:
+                目录的设置比较奇怪，他必须要指定一个所谓的“专案名称、专案识别码”来规范才行;
+
+            实际设置规范与测试:
+                project的设置方式需使用 limit 的 bsoft/bhard;
+                project 能够针对不同的目录做容量限制,而不用管在里头创建文件的文件拥有者;
+
+    quota的管理与额外对照:
+        disable：暂时取消 quota 的限制，但其实系统还是在计算 quota 中，只是没有管制而已！应该算最有用的功能; 
+        enable：就是回复到正常管制的状态中，与 disable 可以互相取消、启用; 
+        off：完全关闭 quota 的限制，使用了这个状态后，你只有卸载再重新挂载才能够再次的启动 quota ;
+        remove：必须要在 off 的状态下才能够执行的指令～这个 remove 可以“移除”quota 的限制设置;
+
+         remove -p 是“移除所有的 project 控制列表”的意思;
+
+        设置流程项目：
+            /etc/fstab参数设置 
+            XFS文件系统：usrquota/grpquota/prjquota ；
+            EXT家族：usrquota/grpquota；

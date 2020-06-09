@@ -1,0 +1,50 @@
+权限管理命令：
+    chmod:
+        英文原意：change the permissions mode of a life
+        执行权限：所有用户
+        路径：/bin/chmod
+        功能：改变文件或目录权限
+        语法：chmod [{ugoa} {+_=} {rwx}] [文件或目录]
+                    [mode = 421] [文件或目录]
+                    -R递归修改
+
+    rw-r--r--
+        文件类型（-二进制文件 d 目录 l 软链接文件 ）
+
+    rw- r-- r--
+        u   g  o
+            u   所有者
+            g   所属者
+            o   其他人
+
+    权限数字表示：
+        r   ----4 （读权限、可以查看文件内容、可以列出目录中的内容)
+        w   ----2  (写权限、可以修改文件内容、可以在目录中创建\删除文件)
+        x   ----1  (执行权限、可以执行文件、可以进入目录)
+
+        rwxrw-r--
+         7  6  4
+
+    
+    chown:
+        英文原意：change file ownership
+        执行权限：所有用户
+        路径：/bin/chown
+        功能：改变文件或目录的所有者
+        语法：chown [用户] [文件或目录]
+
+
+    chgrp:
+        英文原意：change file group ownership
+        执行权限：所有用户
+        路径：/bin/chgrp
+        功能：改变文件或目录的所属组
+        语法：chgrp [用户组] [文件或者目录]
+
+    umask:
+        英文原意：the user file-creation mask
+        执行权限：所有用户
+        路径：Shell内置命令
+        功能：显示、设置文件的缺省权限
+        语法：umask [-S]
+            -S  以rwx形式显示新建文件缺省权限

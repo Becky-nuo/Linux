@@ -1,0 +1,27 @@
+
+ip addr没有出现网卡相关的ip信息：
+    cd  /etc/sysconfig/network-scripts
+    
+    vi  ifcfg-ens33
+    更改内容：
+        BOOTPROTO=static   --->dhcp-->static
+        ONBOOT=yes   --->no-->yes
+        IPADDR=XXX.XXX.XXX.XXX  (IP地址)
+        NETMASK=XXX.XXX.XXX.XXX (子网掩码)
+        GATEWAY=XXX.XXX.XXX.XXX (网关)
+        DNS1=XXX.XXX.XXX.XXX    (DNS域名解析)
+
+ 
+重启网络服务：
+    查看网络服务状态：systemctl  status  network
+    启动网络服务：systemctl  start  network
+    重启网络服务：systemctl  start  network
+
+
+出现问题：
+    网段错误：
+        打开vmware --> 编辑 --> 虚拟网络编辑器
+    
+    检查虚拟网卡是否存在
+        更改网络适配器选项  --> 检查是否存在对应的虚拟网卡
+        如果不存在 --> 百度一下 “vmware没有虚拟网卡”

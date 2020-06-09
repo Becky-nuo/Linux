@@ -1,0 +1,187 @@
+命令执行的判断依据：
+    cmd：不考虑指令相关性的连续指令下达；
+    指令与指令中间利用分号(;)来隔开，分号前的指令执行完后就会立刻接着执行后面的指令；
+
+    $?(指令回传值)与 && 或 ||：
+        若前一个指令执行的结果为正确，在 Linux 下面会回传一个 $? = 0 的值；
+        两个 & 之间是没有空格的， | 则是 [Shift]+[\] 的按键结果；
+
+        cmd1 && cmd2：
+            若 cmd1 执行完毕且正确执行（$?=0），则开始执行 cmd2；
+            若 cmd1 执行完毕且为错误 （$?≠0），则 cmd2 不执行；
+
+        cmd1 || cmd2：
+            若 cmd1 执行完毕且正确执行（$?=0），则 cmd2 不执行；
+            若 cmd1 执行完毕且为错误 （$?≠0），则开始执行 cmd2； 
+
+            例一：使用 ls 查阅目录 /tmp/abc 是否存在，若存在则用 touch 创建 /tmp/abc/hehe:
+                $ ls /tmp/abc && touch /tmp/abc/hehe 
+                    ls： cannot access /tmp/abc: No such file or directory 
+                    # ls 很干脆的说明找不到该目录，但并没有 touch 的错误，表示 touch 并没有执行；
+                $ mkdir /tmp/abc
+                $ ls /tmp/abc && touch /tmp/abc/hehe 
+                $ ll /tmp/abc 
+                    -rw-rw-r--. 
+                (/tmp/abc 不存在时，touch 就不会被执行，若 /tmp/abc 存在的话，那么 touch 就会执行) 
+
+            例二：测试 /tmp/abc 是否存在，若不存在则予以创建，若存在就不作任何事情：
+                $ rm -r /tmp/abc    #先删除此目录以方便测试；
+                $ ls /tmp/abc || mkdir /tmp/abc 
+                    ls: cannot access /tmp/abc: No such file or directory  #不存在；
+                $ ll -d /tmp/abc 
+                    drwxrwxr-x. #结果出现，有进行 mkdir
+            (指令是一个接着一个去执行的，因此，如果真要使用判断，那么这个 && 与 || 的顺序就不能搞错)
+
+    管线命令：pipe
+        管线命令使用的是“ | ”这个界定符号,管线命令与“连续下达命令”是不一样的；
+        管线命令“ | ”仅能处理经由前面一个指令传来的正确信息(standard output)，对于stdandard error并没有直接处理的能力；
+        管线命令的注意事项：
+           管线命令仅会处理 standard output，对于 standard error output 会予以忽略； 
+           管线命令必须要能够接受来自前一个指令的数据成为 standard input 继续处理才行； 
+
+    
+    
+    取命令:
+        cut:
+            $ cut -d'分隔字符' -f fields    #用于有特定分隔字符； 
+            $ cut -c 字符区间   #用于排列整齐的讯息； 
+            选项与参数： 
+                -d ：后面接分隔字符。与 -f 一起使用； 
+                -f ：依据 -d 的分隔字符将一段讯息分区成为数段，用 -f 取出第几段的意思； 
+                -c ：以字符 （characters） 的单位取出固定字符区间；
+
+            例一：将 PATH 变量取出，找出第五个路径:
+                $ echo ${PATH}  ## 数字显示，是以“ : ”作为分隔；
+
+            用途在于将“同一行里面的数据进行分解；
+
+        grep：
+            $ grep [-acinv] [--color=auto] '搜寻字串' filename 
+            选项与参数： 
+                -a： 将 binary 文件以 text 文件的方式搜寻数据； 
+                -c： 计算找到 '搜寻字串' 的次数 ；
+                -i： 忽略大小写的不同，所以大小写视为相同； 
+                -n： 顺便输出行号;
+                -v： 反向选择，亦即显示出没有 '搜寻字串' 内容的那一行；
+                ——color=auto：可以将找到的关键字部分加上颜色的显示； 
+                
+            例一：将 last 当中，有出现 root 的那一行就取出来：
+                $ last | grep 'root' 
+                
+            例二：与范例一相反，只要没有 root 的就取出：
+                $ last | grep -v 'root' 
+                
+            例三：在 last 的输出讯息中，只要有 root 就取出，并且仅取第一栏:
+                $ last | grep 'root' |cut -d ' ' -f1 
+                # 在取出 root 之后，利用上个指令 cut 的处理，就能够仅取得第一栏；
+
+        
+    排序命令：
+        sort：排序，依据不同的数据型态来排序；
+            $ sort [-fbMnrtuk] [file or stdin] 
+            选项与参数： 
+                -f ：忽略大小写的差异，例如 A 与 a 视为编码相同； 
+                -b ：忽略最前面的空白字符部分； 
+                -M ：以月份的名字来排序，例如 JAN, DEC 等等的排序方法； 
+                -n ：使用“纯数字”进行排序(默认是以文字体态来排序的)； 
+                -r ：反向排序； 
+                -u ：就是uniq,相同的数据中，仅出现一行代表； 
+                -t ：分隔符号,默认是用[tab]键来分隔；
+                -k ：以那个区间 （field） 来进行排序的意思；
+
+        uniq：将重复的数据仅列出一个显示；
+            $ uniq [-ic] 
+            选项与参数： 
+            -i ：忽略大小写字符的不同； 
+            -c ：进行计数；
+
+        
+        wc：用来将“重复的行删除掉只显示一个；
+          $ wc [-lwm] 
+          选项与参数： 
+            -l ：仅列出行； 
+            -w ：仅列出多少字（英文单字）； 
+            -m ：多少字符； 
+
+
+    分区命令：
+        split：依据文件大小或行数来分区，就可以将大文件分区成为小文件；
+        语法：$ split [-bl] file PREFIX 
+        选项与参数： 
+            -b ：后面可接欲分区成的文件大小，可加单位，例如 b, k, m 等； 
+            -l ：以行数来进行分区。 
+            PREFIX ：代表前置字符的意思，可作为分区文件的前导文字； 
+            
+            例一：/etc/services 有六百多K，想要分成 300K 一个文件：
+                $ cd /tmp; split -b 300k /etc/services services 
+                $ ll -k services* 
+                    -rw-rw-r--.
+                    -rw-rw-r--. 
+                    -rw-rw-r--. 
+                # 文件名可以随意取，只要写上前导文字，小文件就会以xxxaa, xxxab, xxxac 等方式来创建小文件； 
+                
+            例二：将上面的三个小文件合成一个文件，文件名为 servicesback： 
+                $ cat services* >> servicesback 
+                # 用数据流重导向就好了；
+                
+                
+            例三：使用 ls -al / 输出的信息中，每十行记录成一个文件： 
+                $ ls -al / | split -l 10 - lsroot 
+                $ wc -l lsroot* 
+                    10 lsrootaa 
+                    10 lsrootab 
+                    4 lsrootac 
+                    24 total 
+                # 重点在，如果需要 stdout/stdin 时，但偏偏又没有文件， 
+                有的只是 - 时，那么那个 - 就会被当成 stdin 或 stdout ～；
+
+        #在Linux下面，将文件分区就使用-b size 来将一个分区文件限制其大小，行数的话，用-line分区；
+
+
+    参数代换：
+        xargs：字面上的意义来看，x 是加减乘除的乘号，args 则是 arguments （参数） 的意思，产生某个指令的参数；
+        语法：xargs [-0epn] command 
+        选项与参数： 
+            -0 ：-0 参数，可以将特殊字符(`、\、空白键)还原成一般字符。这个参数可以用于特殊状态； 
+            -e ：是 EOF （end of file） 的意思，后面可以接一个字串，当 xargs 分析到这个字串时，就会停止继续工作； 
+            -p ：在执行每个指令的 argument 时，都会询问使用者的意思； 
+            -n ：后面接次数，每次 command 指令执行时，要使用几个参数的意思，当xargs后面没有接任何的指令时，默认是以echo来进行输出； 
+            
+        
+            例：将 /etc/passwd 内的第一栏取出，仅取三行，使用 id 这个指令将每个帐号内容秀出来：
+                $ id root 
+                    uid=0（root） 
+                    gid=0（root） 
+                    groups=0（root） # 这个 id 指令可以查询使用者的 UID/GID 等信息；
+                
+                $ id $（cut -d ':' -f 1 /etc/passwd | head -n 3） 
+                    # 使用 $（cmd）可以预先取得参数，但可惜的是，id 这个指令“仅”能接受一个参数而已，
+                    # 所以上述的这个指令执行会出现错误！根本不会显示用户的 ID ；
+                
+                $ cut -d ':' -f 1 /etc/passwd | head -n 3 | id 
+                    uid=1000（dmtsai） 
+                    gid=1000（dmtsai） 
+                    groups=1000（dmtsai）,10（wheel） 
+                    #不是要查自己，因为 id 并不是管线命令，因此在上面这个指令执行后，前面的东西通通不见，只会执行 id； 
+                    
+                $ cut -d ':' -f 1 /etc/passwd | head -n 3 | xargs id 
+                    # 依旧会出现错误，因为 xargs 一口气将全部的数据通通丢给 id 处理～但 id 就接受 1 个啊最多；
+                    
+                $ cut -d ':' -f 1 /etc/passwd | head -n 3 | xargs -n 1 id 
+                    uid=0（root） gid=0（root） groups=0（root） 
+                    uid=1（bin） gid=1（bin） groups=1（bin） 
+                    uid=2（daemon） gid=2（daemon） groups=2（daemon） 
+                    # 通过 -n 来处理，一次给予一个参数，因此上述的结果就正常的显示；
+
+            使用xargs原因：很多指令其实并不支持管线命令，因此我们可以通过 xargs 来提供该指令引用 standard input 之用；
+
+
+    关于减好(-)的用途：
+        某些指令需要用到文件名称(例如 tar)来进行处理时，该 stdin 与 stdout 可以利用减号 "-" 来替代；
+
+        例:
+            $mkdir /tmp/homeback
+            $tar -cvf - /home | tar -xvf - -C /tmp/homeback
+            #将 /home 里面的文件给他打包，但打包的数据不是纪录到文件，而是传送到 stdout,
+            #经过管线后，将 tar -cvf -/home 传送给后面的tar -xvf-；
+     
