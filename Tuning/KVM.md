@@ -383,5 +383,5 @@ qemu+ssh://172.16.19.200/system  #连接到目标主机
 `virsh migrate --live --unsafe host qemu+ssh://172.16.19.200/system`
 
 ###在宿主机A上：
->打开virsh-manager，连接宿主机B，在A、B上建立共享存储：
->把虚拟机host存储卷copy到本地映射的共享存储位置
+>打开virsh-manager，连接宿主机B，在A、B上建立共享存储;
+>把虚拟机host存储卷copy到本地映射的共享存储位置;
