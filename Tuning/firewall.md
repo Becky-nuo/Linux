@@ -1,17 +1,17 @@
 #linux防火墙管理
 
 ##实验目的
->了解Linux系统的软件防火墙工作原理，掌握Firewalld的配置方法
+>了解Linux系统的软件防火墙工作原理，掌握Firewalld的配置方法；
 
 ##实验内容
 >安装与配置firewalld
 
 ##实验要求
- >记住firewalld的九大区域，能够使用firewalld进行相关控制
+ >记住firewalld的九大区域，能够使用firewalld进行相关控制；
 
 ##准备知识
->防火墙（Firewall）：计算机网络中的防火墙通常连接两个网络，是外部Internet和内部网络之间的交汇点,同时也是一道屏障
->主要功能：实施安全策略、过滤传输数据、记录Internet活动、IP地址转换、保护内部网络信息安全
+>防火墙（Firewall）：计算机网络中的防火墙通常连接两个网络，是外部Internet和内部网络之间的交汇点,同时也是一道屏障；
+>主要功能：实施安全策略、过滤传输数据、记录Internet活动、IP地址转换、保护内部网络信息安全；
 
 ###类型：
 >包过滤防火墙：对通过它的每一个数据包，根据事先制订好的规则，对它的源地址、目的地址以及相应的端口进行判断，把不合规则的数据包都过滤掉 
@@ -45,7 +45,7 @@
 
 
 >软件防火墙：Linux防火墙采用包过滤技术，大致经历了四个发展阶段：
->静态防火墙：需要自行制订规则，每次改变后都需要重启防火墙
+>静态防火墙：需要自行制订规则，每次改变后都需要重启防火墙；
 ```
 ipfwadm	
 ipchains	
@@ -120,7 +120,7 @@ systemctl start httpd
 >R 防火墙：
 >>查看当前默认区域规则：`firewall-cmd --list-all`
 
->可以看到，当前默认区域public没有允许http服务通过，所以Client B是无法访问A的http服务的
+>可以看到，当前默认区域public没有允许http服务通过，所以Client B是无法访问A的http服务的；
 
 >方法一：将http服务加入默认区域：`firewall-cmd --add-service=http`
 >方法二：将默认区域修改为trusted区域（信任）：`firewall-cmd --set-default-zone=trusted`
@@ -130,7 +130,7 @@ systemctl start httpd
 `firewall-cmd --add-icmp-block=echo-request`
 
 >维护注意事项：
->>所有修改过的规则，在重启服务后将失效，要永久生效，需要用参数“--permanent”，然后重启服务。比如：
+>>所有修改过的规则，在重启服务后将失效，要永久生效，需要用参数“--permanent”，然后重启服务；比如：
 ```
 firewall-cmd --permanent --add-service=http
 systemctl restart firewalld
