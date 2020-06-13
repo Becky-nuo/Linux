@@ -134,10 +134,10 @@ sfs-nas1.cn-south-1c.myhuaweicloud.com:/share-08133236 /XF-nfs nfs vers=3,timeo=
 >点击“更多”选项中的“复制对象URL”可以获得下载地址
 
 
-使用ECS云主机下载这个文件到挂载目录/XF-nfs，这时的效果其实就相当于把文件存放到了云存储文件系统中了
-登录ECS云主机使用以下命令下载：
-wget -O /XF-nfs/video.zip 对象下载URL  
-查看下载情况：ls /XF-nfs
+>使用ECS云主机下载这个文件到挂载目录/XF-nfs，这时的效果其实就相当于把文件存放到了云存储文件系统中了,登录ECS云主机使用以下命令下载：
+`wget -O /XF-nfs/video.zip 对象下载URL ` 
+
+>查看下载情况：ls /XF-nfs
 
 
 
