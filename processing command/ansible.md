@@ -92,6 +92,125 @@ slave:ssh server
 >基于“模块”完成各种“任务”
 
 
+##常用模块：
+>command： 命令模块（默认模块）,用于在远程执行命令；
+>>例：ansible all -a 'date'；
+
+>cron：
+```
+     state:状态
+	present：安装
+	absent：移除
+```
+>>例：让远程主机每10分钟执行一次“输出hello world”；
+
+`ansible 192.168.98.44 -m cron -a 'minute="*/10" job="/bin/echo hello" name="test cron job"'`
+
+>检查远程主机：
+`ansible 192.168.98.44 -a 'crontab -l'`
+
+>移除任务：
+`ansible 192.168.98.44 -m cron -a 'minute="*/10" job="/bin/echo hello" name="test cron job" state=absent'`
+
+>user： 用户模块；
+
+>>例：
+```
+添加用户：ansible -m user -a 'name="user1"'；
+删除用户：ansible -m user -a 'name="user1" state=absent'；
+
+创建组
+ansible all -m group -a 'name=mysql gid=306 system=yes'；
+```
+>copy：复制模块:
+```
+	src:指定本地源文件路径；
+	dest：指定远程目标文件复制路径；
+	content：取代src参数，指定源文件内容；
+```
+>>例：
+```
+ansible all -m copy -a 'src=/etc/fstab dest=/tmp/fatab.ansible owner=root mode=640
+
+ansible all -m copy -a 'content="hello world\nMy name is leon" dest=/tmp/test.ansible'
+```
+>file：文件管理模块
+```
+path：指定文件路径;
+	
+创建链接文件：
+	state=link：创建链接文件；
+	src=指明源文件；
+	path：指明链接文件路径；
+```
+>>例：
+```
+ansible all -m file -a 'owner=mysql group=msyql mode=644 /tmp/fatab.ansible
+
+ansible all -m file -a 'path=/tmp/fstab.link src=/tmp/fatab.ansible state=link'
+```
+
+>ping 网络测试模块
+
+>>例：ansible all -m ping 
+
+>service 服务管理模块:
+```
+enabled：是否开机启动，true或false；
+name：服务名；
+state：状态，started/stopped/restarted；
+```
+>检查远程主机服务状态：
+```
+ansible all -a 'service httpd status'
+ansible all -a 'chkconfig --list httpd'
+```
+>起服务，加开机自启
+`ansible all -m service -a 'enabled=true name=httpd state=started'`
+
+>shell  变量模块（command不支持变量参数）
+```
+
+ansible all -m user -a 'name=user1'
+尝试：ansible all -m command -a 'echo 123456|passwd --stidn user1'
+ansible all -m shell -a 'echo 123456|passwd --stidn user1'
+```
+
+>script 脚本模块；
+
+>>注意：基于相对路径方式使用；
+
+>>创建一个本地脚本；
+```
+vim /tmp/test.sh
+#!/bin/bash
+echo "hello ansible" > /tmp/script.ansible
+useradd user2
+chmod +x /tmp/test.sh
+
+cd /tmp
+ansible all -m script -a "test.sh"
+```
+>yum 安装程序包模块；
+```
+name:指明程序包的名称；
+state：present/lastest安装，absent卸载；
+
+ansible all -m yum -a "name=httpd"
+```
+>查询 `rpm -q httpd`
+
+>卸载：
+`ansible all -m yum -a "name=httpd state=absent"`
+
+
+>setup 收集远程主机可用的facts（相关信息，如）；
+
+>>每个被管理节点在接收并运行管理命令之前，会将自己主机相关信息，如操作系统版本，IP地址等报告给远程的ansible主机；
+
+
+>>例：ansbile all -m setup（所有主机的所有信息）；
+
 
 
 
