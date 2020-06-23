@@ -109,6 +109,66 @@ setenforce 0
 >设置字体显示为中文，点击界面右上角的用户；
 
 
+##Zabbix磁盘监控
+###实验目的
+
+>掌握zabbix添加监控主机的方法；
+
+###实验内容
+>添加主机磁盘监控；
+>添加linux客户端监控；
+
+###实验要求
+>监控本机；
+>监控linux客户端；
+
+###实验步骤
+>登录zabbix，将本机加入监控；
+>选择监控模板，选择监控项；
+>添加linux客户端监控；
+>登录zabbix，用户Admin，密码zabbix；
+
+>启用本机监控功能,顺序点击“配置”-“主机”-“停用的”，开启本机监控；
+
+>选择监控模板，选择监控项,单击主机，可以看到默认配置项，无须修改；
+
+>查看模板；
+
+>选择监控项，点击“主机”，点击“监控项”；
+
+>勾选需要监控的项目后，点击“启用”；
+
+>返回主页，查看监控效果；
+
+>添加linux客户端监控：
+
+>在需要监控的linux客户端安装zabbix-agent:
+`yum install -y zabbix-agent`
+
+>修改配置文件zabbix_agentd.conf，修改zabbix server的ip地址:
+```
+vim /etc/zabbix/zabbix_agentd.conf
+
+Server=192.168.80.150			#zabbix服务端地址，根据实际情况修改
+ServerActive=192.168.80.150	 #zabbix服务端地址，根据实际情况修改
+```	
+>加入开机自启并启动zabbix客户端:
+```
+systemctl enable zabbix-agent
+systemctl start zabbix-agent
+```
+
+>添加客户机的监控,界面操作：配置--主创—创建主机；
+	
+>填写客户机信息,单击主机，选择模板“Template OS Linux”；
+
+>选择监控项；
+
+
+
+
+
+
 
 
 
