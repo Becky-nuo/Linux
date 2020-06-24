@@ -165,6 +165,99 @@ systemctl start zabbix-agent
 >选择监控项；
 
 
+##Zabbix邮件告警
+###实验目的
+>掌握Zabbix邮件告警相关设置；
+
+###实验内容
+>下载sendEmail
+>编写mail.sh邮件脚本；
+>配置邮件服务；
+
+
+###实验要求
+>监控本机；
+>监控linux客户端；
+
+###实验步骤
+>下载sendEmail
+`wget http://caspian.dotconf.net/menu/Software/SendEmail/sendEmail-v1.56.tar.gz`
+
+>>解压软件，然后将sendemail复制到/usr/local/bin/目录下，并加上可执行权限，然后修改用户和群组：
+```
+tar -xvf sendEmail-v1.56.tar.gz
+cp sendEmail-v1.56/sendEmail /usr/local/bin/
+chmod 755 /usr/local/bin/sendEmail
+chown zabbix.zabbix sendEmail
+ll /usr/local/bin
+```
+
+>确认报警脚本的目录:
+```
+vim /etc/zabbix/zabbix_server.conf
+AlertScriptsPath=/usr/local/zabbix/alertscripts
+```
+
+>在报警脚本目录，编写邮件脚本mail.py；
+
+>发送txt文本邮件
+```
+import smtplib
+from email.mime.text import MIMEText
+from sys import argv
+
+mailto_list=[]
+mail_host="smtp.qq.com:25"  #设置服务器
+mail_user="XX@qq.com"     #发件用户名(换成自己的)
+mail_pass="XXXXX"   #口令（换成自己的） 
+mail_postfix="qq.com"  #发件箱的后缀
+debug_level=0       #是否开启debug
+
+def send_mail(to_list,sub,content):
+    me=mail_user
+    msg = MIMEText(content,_subtype='plain',_charset='utf-8')
+    msg['Subject'] = sub
+    msg['From'] = me
+    msg['To'] = ";".join(to_list)
+    try:
+        server = smtplib.SMTP()
+        server.set_debuglevel(debug_level)
+        server.connect(mail_host)
+        server.login(mail_user,mail_pass)
+        server.sendmail(me, to_list, msg.as_string())
+        server.close()
+        return True
+    except Exception, e:
+        print str(e)
+        return False
+if __name__ == '__main__':
+    try:
+        mailto_list=argv[1].split(';')
+        sub=argv[2]
+        content=argv[3]
+    except:
+        print "python send_mail.py 'XXXXX@qq.com' sub content"
+        exit()
+
+    if send_mail(mailto_list,sub,content):
+        print "发送成功"
+    else:
+        print "发送失败"
+
+```
+
+>zabbix web端——创建媒体类型；
+>用户指定媒介；
+>创建动作；
+
+>测试：
+>>手动关闭监控中的某台主机，查看报警情况；
+
+
+
+
+
+
 
 
 
