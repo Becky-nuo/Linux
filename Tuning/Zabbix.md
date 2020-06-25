@@ -254,6 +254,75 @@ if __name__ == '__main__':
 >>手动关闭监控中的某台主机，查看报警情况；
 
 
+##Zabbix服务监控
+
+##实验目的
+>掌握zabbix添加nginx服务的方法与配置
+
+###实验内容
+>为客户机安装nginx服务
+>zabbix Server添加客户机的nginx服务监控
+
+###实验要求
+>客户机成功安装nginx服务并能通过浏览器访问
+>Zabbix成功监控nginx服务
+
+###实验步骤
+>使用zabbix监控nginx服务
+
+
+###实验流程：
+
+
+>在Nginx-Server安装nginx服务
+>>下载安装nginx
+```
+wget http://dl.Fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+rpm -ivh epel-release-latest-7.noarch.rpm
+yum install nginx -y
+```
+
+>>启动nginx
+```
+systemctl start nginx
+systemctl enable nginx
+```
+
+>测试：
+```
+systemctl stop firewalld.service 		#停止firewall
+systemctl disable firewalld.service	 	#禁止firewall开机启动
+```
+>>关闭selinux
+>>浏览器打开：http://服务器地址
+
+>在zabbix Server添加nginx服务监控
+
+>>点击“Web监测”-“创建Web场景”
+
+>>新增“步骤”
+
+>>点击“添加”
+
+>>新增触发器：“配置”-“主机”“触发器”
+
+>>“创建触发器”
+
+>>查看监测状态：“监测中”-“Web监测”
+
+
+>模拟nginx服务故障，
+
+>>修改nginx Server上index.html文件后缀，模拟故障
+```
+cd /usr/share/nginx/html
+mv index.html index.html.bak
+```
+
+>>打开nginx页面：`http://192.168.80.99`
+
+>>查看zabbix监控：
+
 
 
 
