@@ -324,6 +324,80 @@ mv index.html index.html.bak
 >>查看zabbix监控：
 
 
+##监控Windowns
+
+###下载zabbix_agents_3.0.4.win.zip
+
+
+>修改三个参数：
+>>找到conf下的配置文件 zabbix_agentd.win.conf ，修改LogFile、Server、、ServerActive、Hostname这四个参数。具体配置如下：
+
+```
+LogFile=c:\zabbix_agentd.log  #默认参数，启动后会自动生成。
+Server=192.168.30.141         #被监控主机的IP地址
+Hostname=WIN-194215QI0VR      #被监控主机名称
+ServerActive=192.168.30.141 
+```
+>>zabbix server地址 #其中logfile是zabbix日志存放地址。Server是zabbix服务端ip地址。Hostname是本机机器名。
+
+>查看windows主机名称：
+>>C:\Users\Administrator>hostname
+>>WIN-194215QI0VR
+
+
+>zabbix-agent语法
+```
+ -c ：指定配置文件所有位置
+ -i ：安装客户端
+ -s ：启动客户端
+ -x ：停止客户端
+ -d ：卸载客户端
+```
+
+>启动zabbix-agent服务
+
+>>开始--->运行：cmd （记得以管理员身份运行，否则会造成服务无法成功启动）
+```
+C:\zabbix\bin\win64>zabbix_agentd.exe -c C:\zabbix\conf\zabbix_agentd.win.conf -i
+zabbix_agentd.exe [304]: service [Zabbix Agent] installed successfully
+zabbix_agentd.exe [304]: event source [Zabbix Agent] installed successfully
+```
+
+>重启服务的方法
+
+>>C:\Windows\system32>net stop "Zabbix Agent"
+>>Zabbix Agent 服务已成功停止。
+
+
+>>C:\Windows\system32>net start "Zabbix Agent"
+>>Zabbix Agent 服务正在启动 .
+>>Zabbix Agent 服务已经启动成功。
+
+
+
+>卸载zabbix-agent （如果需要）
+```
+C:\zabbix\bin\win64>zabbix_agentd -d
+zabbix_agentd [6040]: service [Zabbix Agent] uninstalled successfully
+zabbix_agentd [6040]: event source [Zabbix Agent] uninstalled successfully
+
+```
+
+>把服务设置为开机自动启动
+
+>查看zabbix-agnet端口：10050
+
+`C:\Users\Administrator>netstat -an | find "10050"`
+
+
+###添加监控windows主机
+
+
+
+
+
+
+
 
 
 
