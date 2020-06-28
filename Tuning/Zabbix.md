@@ -16,10 +16,10 @@
 
 
 ###实验步骤
->安装maria数据库；
->zabbix数据库相关配置；
->安装zabbix服务端及网页界面设置；
 
+>下载安装包
+
+`wget -r -np -nH -R index.html http://repo.zabbix.com/zabbix/3.2/rhel/7/x86_64/`
 
 >安装maria数据库:`yum -y install mariadb-server`
 
@@ -55,7 +55,8 @@ exit		#退出
 
 >安装zabbix服务端及网页界面设置,获取并安装zabbix的yum源：
 ```
-wget http://repo.zabbix.com/zabbix/3.2/rhel/7/x86_64/zabbix-release-3.2-1.el7.noarch.rpm
+wget 
+http://repo.zabbix.com/zabbix/3.2/rhel/7/x86_64/zabbix-release-3.2-1.el7.noarch.rpm
 rpm -ivh zabbix-release-3.2-1.el7.noarch.rpm
 yum -y install zabbix-server-mysql zabbix-web-mysql zabbix-agent
 ```
@@ -64,7 +65,9 @@ yum -y install zabbix-server-mysql zabbix-web-mysql zabbix-agent
 ```
 cd /usr/share/doc/zabbix-server-mysql-3.2.11/
 zcat create.sql.gz | mysql -uzabbix -p123456 zabbix
-修改zabbix_server.conf配置文件
+```
+>修改zabbix_server.conf配置文件:
+```
 vim /etc/zabbix/zabbix_server.conf
 DBPassword=123456
 ```
@@ -94,19 +97,19 @@ systemctl disable firewalld
 setenforce 0
 ```
 
->访问地址：http://server-ip/zabbix/setup.php
+>访问地址：`http://server-ip/zabbix/setup.php`
 >>注：server-ip为本机ip地址
 
 >注：下面的所有配置必须都为ok才可以；
 
 
->配置zabbix的数据库相关信息，此处的密码为“123456”；
+>>配置zabbix的数据库相关信息，此处的密码为“123456”；
 >>确认所有设置信息；
 
 
->登录zabbix,默认用户为admin，密码为zabbix；
+>>登录zabbix,默认用户为admin，密码为zabbix；
 
->设置字体显示为中文，点击界面右上角的用户；
+>>设置字体显示为中文，点击界面右上角的用户；
 
 
 ##Zabbix磁盘监控
@@ -123,27 +126,30 @@ setenforce 0
 >监控linux客户端；
 
 ###实验步骤
->登录zabbix，将本机加入监控；
->选择监控模板，选择监控项；
->添加linux客户端监控；
+
 >登录zabbix，用户Admin，密码zabbix；
 
->启用本机监控功能,顺序点击“配置”-“主机”-“停用的”，开启本机监控；
+>>启用本机监控功能,顺序点击“配置”-“主机”-“停用的”，开启本机监控；
+
 
 >选择监控模板，选择监控项,单击主机，可以看到默认配置项，无须修改；
 
+
 >查看模板；
 
->选择监控项，点击“主机”，点击“监控项”；
+>选择监控项；
+>>点击“主机”，点击“监控项”；
 
->勾选需要监控的项目后，点击“启用”；
+>>勾选需要监控的项目后，点击“启用”；
 
->返回主页，查看监控效果；
+>>返回主页，查看监控效果；
+
 
 >添加linux客户端监控：
 
->在需要监控的linux客户端安装zabbix-agent:
+>>在需要监控的linux客户端安装zabbix-agent:
 `yum install -y zabbix-agent`
+
 
 >修改配置文件zabbix_agentd.conf，修改zabbix server的ip地址:
 ```
@@ -152,6 +158,7 @@ vim /etc/zabbix/zabbix_agentd.conf
 Server=192.168.80.150			#zabbix服务端地址，根据实际情况修改
 ServerActive=192.168.80.150	 #zabbix服务端地址，根据实际情况修改
 ```	
+
 >加入开机自启并启动zabbix客户端:
 ```
 systemctl enable zabbix-agent
@@ -192,15 +199,15 @@ chown zabbix.zabbix sendEmail
 ll /usr/local/bin
 ```
 
->确认报警脚本的目录:
+>>确认报警脚本的目录:
 ```
 vim /etc/zabbix/zabbix_server.conf
 AlertScriptsPath=/usr/local/zabbix/alertscripts
 ```
 
->在报警脚本目录，编写邮件脚本mail.py；
+>>在报警脚本目录，编写邮件脚本mail.py；
 
->发送txt文本邮件
+>>发送txt文本邮件
 ```
 import smtplib
 from email.mime.text import MIMEText
@@ -246,9 +253,9 @@ if __name__ == '__main__':
 
 ```
 
->zabbix web端——创建媒体类型；
+>zabbix web端——创建媒体类型，管理-创建；
 >用户指定媒介；
->创建动作；
+>创建动作，配置-动作-创建；
 
 >测试：
 >>手动关闭监控中的某台主机，查看报警情况；
@@ -269,10 +276,10 @@ if __name__ == '__main__':
 
 ###实验步骤
 >使用zabbix监控nginx服务
-
+![](https://github.com/Becky-nuo/git-test/tree/master/images/Zabbix/001.png)
 
 ###实验流程：
-
+![](https://github.com/Becky-nuo/git-test/tree/master/images/Zabbix/002.png)
 
 >在Nginx-Server安装nginx服务
 >>下载安装nginx
@@ -288,13 +295,14 @@ systemctl start nginx
 systemctl enable nginx
 ```
 
->测试：
+>>测试：
 ```
 systemctl stop firewalld.service 		#停止firewall
 systemctl disable firewalld.service	 	#禁止firewall开机启动
 ```
 >>关闭selinux
 >>浏览器打开：http://服务器地址
+
 
 >在zabbix Server添加nginx服务监控
 
@@ -326,7 +334,7 @@ mv index.html index.html.bak
 
 ##监控Windowns
 
-###下载zabbix_agents_3.0.4.win.zip
+>下载zabbix_agents_3.0.4.win.zip
 
 
 >修改三个参数：
@@ -390,9 +398,36 @@ zabbix_agentd [6040]: event source [Zabbix Agent] uninstalled successfully
 `C:\Users\Administrator>netstat -an | find "10050"`
 
 
-###添加监控windows主机
+>添加监控windows主机
 
 
+>通过以下方法找到网卡真正名称：
+`typeperf -qx | find "Network Interface" | find "Bytes" > c:\network.txt`
+
+>>特别注意：通过适配器看到的网卡名称，和通过命令获取到的网卡名称，有些不一样的地方，要以命令获取到的名称为准，不然有些特殊符号是无法识别的,例如：(R)，PRO/1000，在命令获取到的名称中则是[R]，PRO_1000；
+
+
+>修改客户端配置文件zabbix_agentd.win.conf:
+```
+Server=服务端IP
+Hostname=当前客户端主机名（可直接填写的本机IP）
+
+并在最下面添加以下内容：
+
+PerfCounter = Net_Incoming,"\Network Interface(Intel[R] PRO_1000 MT Desktop Adapter)\Bytes Received/sec",30
+PerfCounter = Net_Outgoing,"\Network Interface(Intel[R] PRO_1000 MT Desktop Adapter)\Bytes Sent/sec",30
+```
+
+
+>重启zabbix客户端服务,在服务器管理器-配置-服务中找到Zabbix Agent重新启动服务或命令:
+```
+zabbix_agentd.exe –x
+zabbix_agentd.exe –s
+```
+
+>服务端验证
+>>在已经搭好的linux服务端上运行下面命令，正常会返回一个数值:
+`zabbix_get -s IP -k "Net_Incoming"  （需要安装zabbix-get）`
 
 
 
