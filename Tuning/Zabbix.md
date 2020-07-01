@@ -28,6 +28,24 @@
 
 
 >>其他监控方式：ssh等，如ansible
+>>zabbix-server默认监听端口：10051
+>>ss -tnpl
+>>zabbix-agent默认监听端口：10050
+
+>配置agent
+
+>>修改配置文件zabbix_agentd.conf，修改zabbix server的ip地址
+`vim /etc/zabbix/zabbix_agentd.conf`
+	
+>>Server=			#zabbix服务端地址，根据实际情况修改
+
+
+
+>>加入开机自启并启动zabbix客户端
+```
+systemctl enable zabbix-agent
+systemctl start zabbix-agent
+```
 
 ###zabbix监控范围
 
