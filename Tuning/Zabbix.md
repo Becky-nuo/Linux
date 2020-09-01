@@ -1,8 +1,8 @@
-#Zabbix认证配置
+# Zabbix认证配置
 
-##zabbix 概述
+## zabbix 概述
 
-###监控系统：
+### 监控系统：
 
 >SNMP协议（Simple Network Manager Protocol）；
 
@@ -47,7 +47,7 @@ systemctl enable zabbix-agent
 systemctl start zabbix-agent
 ```
 
-###zabbix监控范围
+### zabbix监控范围
 
 >设备/软件:服务器、路由器、交换机、输入/输出设备等；
 
@@ -56,7 +56,7 @@ systemctl start zabbix-agent
 >敏感事件：磁盘满、内存不足、cpu利用率等；
 
 
-###zabbix架构
+### zabbix架构
 
 >web Gui：网页接口（界面）；
 >DB：数据库；
@@ -65,7 +65,7 @@ systemctl start zabbix-agent
 
 ----------------------------------------------
 
-###zabbix术语
+### zabbix术语
 
 >host：主机，要监控的网络设备；
 >host group：主机组；
@@ -89,7 +89,7 @@ systemctl start zabbix-agent
 
 
 
-###监控软件应该具备的基本功能：
+### 监控软件应该具备的基本功能：
 
 >zabbix:数据采集-->数据存储-->数据展示/分析-->报警；
 
@@ -110,7 +110,7 @@ mail（smtp）/短信
 wechat/qq/msn
 ```
 
-###触发器（Triggers）
+### 触发器（Triggers）
 
 >监控项（item）：仅负责收集数据，而通常收集数据的目的还包括在某指标对应的数据超出合理范围时给相关人员发送告警信息；
 
@@ -156,7 +156,7 @@ sum（#10），表示最近10次取值之和；
 >>注：对于last函数，last（0）相当于last（#1）；
 
 
-###实验：
+### 实验：
 
 >创建一个触发器：对网卡入方向的流量最后一次采集数据时的阀值大于1K时，触发（警告）事件；
 
@@ -181,7 +181,7 @@ Enable：启用与否；
 ```
 
 
-###zabiix通知（报警）功能
+### zabiix通知（报警）功能
 
 >一般需要两个步骤：
 >>1.定义所需要的“媒介（media）”，如邮件、SMS等；
@@ -191,22 +191,22 @@ Enable：启用与否；
 
 
 
-##安装
+## 安装
 
-###实验目的
+### 实验目的
 >掌握Zabbix的部署过程；
 >掌握Zabiix的相关配置；
 
-###实验内容
+### 实验内容
 >基础环境安装；
 >maria数据库安装；
 >zabbix服务端安装；
 
-###实验要求
+### 实验要求
 >使用Zabbix监控本机磁盘与相关服务；
 
 
-###实验步骤
+### 实验步骤
 
 >下载安装包
 
@@ -303,20 +303,20 @@ setenforce 0
 >>设置字体显示为中文，点击界面右上角的用户；
 
 
-##Zabbix磁盘监控
-###实验目的
+## Zabbix磁盘监控
+### 实验目的
 
 >掌握zabbix添加监控主机的方法；
 
-###实验内容
+### 实验内容
 >添加主机磁盘监控；
 >添加linux客户端监控；
 
-###实验要求
+### 实验要求
 >监控本机；
 >监控linux客户端；
 
-###实验步骤
+### 实验步骤
 
 >登录zabbix，用户Admin，密码zabbix；
 
@@ -363,21 +363,21 @@ systemctl start zabbix-agent
 >选择监控项；
 
 
-##Zabbix邮件告警
-###实验目的
+## Zabbix邮件告警
+### 实验目的
 >掌握Zabbix邮件告警相关设置；
 
-###实验内容
+### 实验内容
 >下载sendEmail
 >编写mail.sh邮件脚本；
 >配置邮件服务；
 
 
-###实验要求
+### 实验要求
 >监控本机；
 >监控linux客户端；
 
-###实验步骤
+### 实验步骤
 >下载sendEmail
 `wget http://caspian.dotconf.net/menu/Software/SendEmail/sendEmail-v1.56.tar.gz`
 
@@ -452,24 +452,24 @@ if __name__ == '__main__':
 >>手动关闭监控中的某台主机，查看报警情况；
 
 
-##Zabbix服务监控
+## Zabbix服务监控
 
-##实验目的
+## 实验目的
 >掌握zabbix添加nginx服务的方法与配置
 
-###实验内容
+### 实验内容
 >为客户机安装nginx服务
 >zabbix Server添加客户机的nginx服务监控
 
-###实验要求
+### 实验要求
 >客户机成功安装nginx服务并能通过浏览器访问
 >Zabbix成功监控nginx服务
 
-###实验步骤
+### 实验步骤
 >使用zabbix监控nginx服务
 ![](https://github.com/Becky-nuo/git-test/tree/master/images/Zabbix/001.png)
 
-###实验流程：
+### 实验流程：
 ![](https://github.com/Becky-nuo/git-test/tree/master/images/Zabbix/002.png)
 
 >在Nginx-Server安装nginx服务
@@ -523,7 +523,7 @@ mv index.html index.html.bak
 >>查看zabbix监控：
 
 
-##监控Windowns
+## 监控Windowns
 
 >下载zabbix_agents_3.0.4.win.zip
 
