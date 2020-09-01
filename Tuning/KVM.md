@@ -1,8 +1,8 @@
-#KVM虚拟化技术
+# KVM虚拟化技术
 
-##环境部署
+## 环境部署
 
-###KVM虚拟机网络模式：
+### KVM虚拟机网络模式：
 >Bridge（网桥）：网桥的基本原理就是创建一个桥接接口br0，在物理网卡和虚拟网络接口之间传递数据，如下图：
 ![](https://github.com/Becky-nuo/git-test/blob/master/images/KVM/001.png)
 
@@ -11,7 +11,7 @@
 
 >“透传”：嵌套式虚拟nested是一个可通过内核参数来启用的功能，能够使一台虚拟机具有物理机CPU特性,支持vmx或者svm(AMD)硬件虚拟化；
 
-###实验步骤
+### 实验步骤
 >KVM安装前准备
 >>安装Centos7.3图形化界面系统，配置本地yum 源检查主机处理器是否支持虚拟化：
 `egrep -o 'vmx | svm' /proc/cpuinfo | wc -l`
@@ -50,7 +50,7 @@ yum install qemu-kvm* virt-* libvirt* -y
 `cat /sys/module/kvm_intel/parameters/nested`
 
 
-###创建网桥br0
+### 创建网桥br0
 	
 >查看主机网上相关信息：`ip a`	
 	
@@ -104,12 +104,12 @@ vim ifcfg-br0					#修改网桥bro配置文件
 >开启网桥stp树协议，防止环路：`brctl stp br0 yes`
 
 
-##创建虚拟机
+## 创建虚拟机
 
-###创建前准备
+### 创建前准备
 >把系统镜像（iso）放到某个目录下,这里的系统镜像路径为:`/opt/centos7.iso`
 
-###开始创建虚拟机：
+### 开始创建虚拟机：
 >创建一个存放虚拟机系统的卷：
 `qemu-img create -f qcow2 /var/lib/libvirt/images/base.qcow2 50G`
 
@@ -136,7 +136,7 @@ virt-install \				#创建命令
 
 ```
 
-###进入centos系统安装
+### 进入centos系统安装
 
 >语言设置：默认英语
 >时区设置：选择“Asia”亚洲-“shanghai”
@@ -151,7 +151,7 @@ virt-install \				#创建命令
 `brctl show`
 
 
-###配置虚拟机：
+### 配置虚拟机：
 >设置主机名：`hostnamectl set-hostname base.xftest.com`
 >配置IP地址
 >>可以使用NetworkManager网络管理工具快速设置：`nmtui`
@@ -173,8 +173,8 @@ ping www.baidu.com
 >测试没问题，命令行创建虚拟机完毕！
 
 
-##虚拟机管理
-###添加网卡（在线）：
+## 虚拟机管理
+### 添加网卡（在线）：
 >查看虚拟机host在物理机上的网卡信息（在物理机操作）:
 `virsh domiflist host`
 
@@ -190,7 +190,7 @@ virsh define /etc/libvirt/qemu/host.xml
 >删除网卡：
 `virsh detach-interface host --type bridge --mac [要删除网卡的mac地址]`
 
-###链路聚合（网卡绑定）：
+### 链路聚合（网卡绑定）：
 >查看当前网卡信息：`nmcli con show`
 >>名称 UUID 类型 设备:
 ``` 
@@ -239,7 +239,7 @@ ping 2个网卡的team地址，禁用ens9
 nmcli deivce disconnect ens9 
 ```
 
-###添加磁盘：
+### 添加磁盘：
 >创建磁盘卷disk.qcow2 ,200G
 `qemu-img create -f qcow2 /var/lib/libvirt/images/disk01.qcow2 200G`
 
@@ -255,14 +255,14 @@ nmcli deivce disconnect ens9
 virsh attach-device host disk01.xml --live --persistent
 ```
 
-###删除磁盘
+### 删除磁盘
 >分离虚拟机host上的vdb磁盘
 `virsh detach-disk host --target vdb` 
 
 
-##虚拟机克隆
+## 虚拟机克隆
 
-###克隆前准备：
+### 克隆前准备：
 >镜像清理,清理所有操作及残留痕迹，如ssh密钥:
 `virt-sysprep --operations ssh-hostkeys.......-a test.qcow2` 
 
@@ -275,7 +275,7 @@ virsh attach-device host disk01.xml --live --persistent
 >克隆虚拟机host，生成虚拟机new-host
 `virt-clone --connect=qemu:///system -o host -n new-host -f /var/lib/libvirt/images/new.qcow2`
 
-###克隆完成后，检查相关配置（mac不可一致，卷路径匹配）：
+### 克隆完成后，检查相关配置（mac不可一致，卷路径匹配）：
 >确认新虚拟机已生成xml文件：
 ```
 ls -lh /etc/libvirt/qemu/host.xml /etc/libvirt/qemu/new-host.xml
@@ -309,7 +309,7 @@ ls -lh /var/lib/libvirt/images/host.qcow2 /var/lib/libvirt/images/leon-template.
 
 ```
 
-###修改主机名
+### 修改主机名
 >virsh# shutdown host #关闭虚拟机host
 
 >导出xml文件:
@@ -335,7 +335,7 @@ mv host.qcow2 net-host.qcow2
 
 ```
 
-##快照功能
+## 快照功能
 >虚拟机管理工具：Virsh
 >在宿主机输入virsh，会进入虚拟机管理终端：
 
@@ -343,7 +343,7 @@ mv host.qcow2 net-host.qcow2
 >查看当前所有虚拟机（包括关机状态的虚拟机）：`list –all`
 
 
-###为虚拟机创建快照（最好在关机状态下创建快照）
+### 为虚拟机创建快照（最好在关机状态下创建快照）
 >关闭虚拟机base
 
 >创建快照：`snapshot-create-as base --name new-install`
@@ -353,8 +353,8 @@ mv host.qcow2 net-host.qcow2
 >恢复快照：`snapshot-revert base new-install`
 
 
-##虚拟机转移
-###移动虚拟机系统到虚拟机:virt-v2v
+## 虚拟机转移
+### 移动虚拟机系统到虚拟机:virt-v2v
 >将目标虚拟机磁盘做到共享存储
 `virt-v2v -ic qemu+ssh://172.16.19.200/system test -o local -os /var/tmp -of qcow2 --bridge virbr0`
 
@@ -368,8 +368,8 @@ qemu+ssh://172.16.19.200/system  #连接到目标主机
 
 >成功后会新生成2个文件：`test-sda test-xml`
 
-##热迁移（在线迁移）
-###存储卷在共享存储池外的虚拟机迁移
+## 热迁移（在线迁移）
+### 存储卷在共享存储池外的虚拟机迁移
 
 >环境：
 ```
@@ -382,6 +382,6 @@ qemu+ssh://172.16.19.200/system  #连接到目标主机
 >命令行热迁移： --live 在线迁移 --unsafe 支持不稳定迁移 qemu+ssh 目标主机:
 `virsh migrate --live --unsafe host qemu+ssh://172.16.19.200/system`
 
-###在宿主机A上：
+### 在宿主机A上：
 >打开virsh-manager，连接宿主机B，在A、B上建立共享存储;
 >把虚拟机host存储卷copy到本地映射的共享存储位置;
