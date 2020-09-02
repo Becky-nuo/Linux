@@ -1,15 +1,15 @@
-#ansible安装与基础命令
+# ansible安装与基础命令
 
 ```
 yum list all *ansible
 yum info ansible
 ```
-##配置ssh登录环境
+## 配置ssh登录环境
 
 >基于密钥登录
 >在inventory文件中指定帐号密码
 
-###ansible 参数：
+### ansible 参数：
 >-m 指定模块
 >-h 指定主机
 
@@ -28,7 +28,7 @@ rpm -ql ansible
 192.168.98.44 ansible_ssh_pass=1 ansible_ssh_user=root
 ```
 
-###基于密钥登录
+### 基于密钥登录
 ```
 cd /etc/ansible
 vim hosts
@@ -36,7 +36,7 @@ vim hosts
 192.168.98.44
 ```
 
-###设置密钥：
+### 设置密钥：
 ```
 ssh-keygen -t rsa
 ssh-copy-id -i /root/.ssh/名称.pub root@192.168.98.44
@@ -44,7 +44,7 @@ ssh-copy-id -i /root/.ssh/名称.pub root@192.168.98.44
 >测试免密登录：`ssh 192.168.98.44`
 
 
-##基础命令
+## 基础命令
 
 >查看模块帮助
 ```
@@ -75,7 +75,7 @@ ansible-doc -s 查看指定模块的使用说明，比如ansible-doc -s yum
 	playbooks（yaml文件）
 	connect plugin
 ```
-##ansible特性：
+## ansible特性：
 >基于python语言实现，由Paramiki，PyYAML和Jinjia2三个关键模块
 
 >部署简单，agentless
@@ -92,7 +92,7 @@ slave:ssh server
 >基于“模块”完成各种“任务”
 
 
-##常用模块：
+## 常用模块：
 >command： 命令模块（默认模块）,用于在远程执行命令；
 >>例：ansible all -a 'date'；
 
