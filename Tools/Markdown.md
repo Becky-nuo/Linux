@@ -4,14 +4,14 @@
 ## 标题
 > 在想要设置为标题的文字前面加#来表示。
 >> 一个#是一级标题，二个#是二级标题，以此类推，支持六级标题。
->> 注：标准语法一般在#后跟个空格再写文字，貌似简书不加空格也行。
+>> 注：标准语法一般在#后跟个空格再写文字，简书可不加空格。
 >![标题](https://github.com/Becky-nuo/git-test/blob/master/images/Markdown/001.png)
 
 ## 段落
 >段落是由一个或多个连续的文本行组成，它的前后要有一个以上的空行。
 
 ## 字体
-###加粗
+### 加粗
 >要加粗的文字左右分别用两个*号包起来。
 
 ### 斜体
@@ -25,12 +25,12 @@
 
 >![字体](https://github.com/Becky-nuo/git-test/blob/master/images/Markdown/003.png)
 
-##区块引用
+## 区块引用
 > *
 > 在引用的文字前加>即可。引用也可以嵌套，如加两个>>三个>>>n个...
 
 
-##分割线
+## 分割线
 > 语法:三个或者三个以上的 - 或者 * 表示，且这一行只有符号，注意不要被识别为二级标题即可，例如中间或者前面可以加空格。
 
 ## 列表
@@ -40,7 +40,7 @@
 ### 有序列表
 > 语法：数字加点（点号后面有个空格）表示有序列表，可嵌套。
 
-###列表嵌套
+### 列表嵌套
 > 上一级和下一级之间敲三个空格即可。
 
 ## 代码
@@ -55,14 +55,16 @@
 
 ## 图片
 > 语法：![图片alt](图片地址)
+> ![](https://github.com/Becky-nuo/git-test/blob/master/images/Markdown/004.png)
 
 ## 流程图
 >主要的语法为 name=>type: describe，其中 type 主要有以下几种：
->>1.开始和结束：start end
->>2.输入输出：inputoutput
->>3.操作：operation
->>4.条件：condition
->>5.子程序：subroutine
+>>1.开始和结束：start end   
+>>2.输入输出：inputoutput   
+>>3.操作：operation   
+>>4.条件：condition   
+>>5.子程序：subroutine   
+
 ## 表格
 >语法：
 >![表格](https://github.com/Becky-nuo/git-test/blob/master/images/Markdown/002.png)
