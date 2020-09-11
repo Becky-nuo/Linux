@@ -220,4 +220,234 @@ ansible all -m yum -a "name=httpd"
 
 
 
+## playbook：剧本
 
+> yaml文件：*.yaml，*.yml，
+
+```
+序列：
+
+- 我是...........................
+-  他是.....................，他有以下特点：
+    - 1、...........
+    - 2、.............
+
+标准剧本规范：vim test.yaml或vim test.yml
+
+---
+```
+```
+- name: chuangjian zu and yonghu
+  hosts: web
+  tasks:
+    - name: create group
+      group:
+        name: abc
+        state: present
+    - name: create user
+      user:
+        name: andy
+        group: abc
+...
+
+
+- hosts: web
+  gather_facts: no
+  tasks:
+    - name: create group
+      group:
+        name: abc
+        state: present
+    - name: create user
+      user:
+        name: andy
+        group: abc
+
+
+ansible-playbook test.yml
+```
+
+>案例一、
+
+>>编写一个剧本，为webs组内主机安装http，并开启服务，加入开机
+>>开启防火墙，放行http服务
+>>命令：
+
+```
+	ansible webs -m yum -a 'name=httpd'
+	ansible webs -m service -a 'name=httpd state=started enabled=true'
+	ansible webs -m firewalld -a 'service=http permanent=true immediate=true state=enabled'
+```
+>> 剧本:
+```
+---
+- hosts: webs
+  gather_facts: no
+  tasks:
+    - name: install httpd package
+      yum:
+        name: httpd
+    - name: start httpd and enable
+      service:
+        name: httpd
+        state: started
+        enabled: true
+    - name: start firewalld
+      service:
+        name: firewalld
+        state: started
+    - name: setting firewalld for http
+      firewalld:
+        service: http
+        permanent: true
+        immediate: true
+        enabled: true
+```
+
+>案例二、
+>>为服务器组web的组内主机安装httpd，并启动httpd，加入开机自启
+>>为服务器组db的组内主机新建系统管理员dbadmin
+>>剧本：
+```
+- hosts: web
+  tasks:
+    - name: install httpd 
+      yum:
+        name: httpd
+    - name: start httpd
+      service:
+        name: httpd
+        state: started
+        enabled: true
+
+- hosts: db
+  tasks:
+    - name: create user
+      user:
+        name: dbadmin
+        group: root
+```
+
+## 用户管理
+
+> 非管理员的ansible工作相关：
+>> 需要配置非管理员自己的ansible.cfg配置文件
+```
+mkdir my-ansible
+cd my-ansible
+vim ansible.cfg
+[defaults]
+inventory = /home/leon/my-ansible/inventory 或 ./inventory
+remote_user = aa
+
+[privilege_escalation]
+become=true
+become_method=sudo
+become_user=root
+become_ask_pass=False
+```
+
+> 配置leon用户自己的清单 
+```
+vim /home/leon/my-ansible/inventory
+
+[web]
+192.168.43.66 ansible_become_method=su ansible_become_user=root ansible_become_pass=1
+[db]
+192.168.43.110 ansible_become_method=su ansible_become_user=root ansible_become_pass=1
+```
+>重做免密（当前非管理员用户的登录免密）
+```
+ssh-keygen
+ssh-copy-id -i aa@web01
+ssh-copy-id -i aa@db01
+```
+
+>测试：ansible all -m ping 
+
+
+## 在清单定义变量
+
+>案例：
+>>为web组主机修改http端口为8080
+>>为db组主机修改http端口为888
+>>使用template模块：
+>>template：在复制文件过程中，该文件可以使用变量
+>>区别copy：不能使用变量
+
+>>template文件为jinja2文件，命名一般为*.j2:`vim httpd.conf.j2`
+
+>>关闭防火墙
+```
+- hosts: all
+  tasks:
+  - name: copy httpd.conf.j2 to web server
+    template:
+      src: httpd.conf.j2
+      dest: /etc/httpd/conf/httpd.conf
+  - name: restart httpd
+    service:
+      name: httpd
+      state: restarted
+```
+
+## 在剧本定义变量
+```
+- hosts: all
+  vars:
+    a: leon
+    b: root
+  tasks:
+  - name: create user
+    user:
+      name: {{ a }}
+      group: {{ b }}
+```
+
+>案例：
+```
+register：自定义（注册变量）
+
+- hosts: all
+  tasks:
+    - name: test register
+      shell: hostname
+      register: d
+    - name: display db group hostname
+      debug: msg="{{ d.stdout }}"
+```
+
+>清空源目录剧本：
+```
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: list all /etc/yum.repos.d/
+      shell: ls /etc/yum.repos.d
+      register: d
+    - name: delete all file from /etc/yum.repos.d
+      file: path=/etc/yum.repos.d/{{ item }} state=absent
+      with_items:
+        - "{{ d.stdout_lines }}"
+```
+
+> ansible all -m setup（事实facts）
+
+> 条件判断when
+
+>> 为所有红帽和乌班图系统的服务器安装elinks
+
+```
+- hosts: all
+  vars:
+    aa:
+      - Redhat
+      - ubuntu
+  tasks:
+    - name: install elinks package
+      yum:
+        name: elinks
+        state: present
+      when: ansible_distribution in aa
+
+```
