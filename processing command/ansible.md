@@ -479,6 +479,7 @@ register：自定义（注册变量）
 
 
 >编写剧本：
+```
 - hosts: all
   tasks:
     - name: start firewalld for all servers
@@ -522,6 +523,7 @@ register：自定义（注册变量）
         name: httpd
         state: restarted
 
+```
 
 ## 大型清单管理
 > 查询主机db1.example.com是否在清单inventory1内
