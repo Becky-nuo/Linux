@@ -1,38 +1,38 @@
-# ansible
->开源自动化平台
->类型：控制节点（ansible 服务器）和受管主机。
->所有受管主机都要在清单内
+# ansible    
+>开源自动化平台    
+>类型：控制节点（ansible 服务器）和受管主机。   
+>所有受管主机都要在清单内     
 
 ## 基础命令
 
->查看模块帮助
-```
-ansible-doc -l 查看ansible当前支持的所有模块
+>查看模块帮助  
+``` 
+ansible-doc -l 查看ansible当前支持的所有模块    
 ansible-doc -s 查看指定模块的使用说明，比如ansible-doc -s yum
 ```
 >ansible命令应用基础：
->>语法：ansible <host-pattern> [-f forks] [-m module_name] [-a args]
+>>语法：ansible <host-pattern> [-f forks] [-m module_name] [-a args]   
 ```
--f  forks：启动的并发线程数;
--m module name：是使用的模块
--a agrs：模块特定的参数
+-f  forks：启动的并发线程数;   
+-m module name：是使用的模块   
+-a agrs：模块特定的参数   
 ```
 >>例：ansible 192.168.98.44 -m command -a 'date'
 
 
 
->运维工具分类：
+>运维工具分类：   
 ```
-	agent：puppet,func
-	agentless：ansible，fabric，ssh service
+	agent：puppet,func    
+	agentless：ansible，fabric，ssh service   
 	
 	ansible核心组件：
-	ansible core
-	host iventory
-	core modules
-	custom modules
-	playbooks（yaml文件）
-	connect plugin
+		ansible core   
+		host iventory
+		core modules
+		custom modules
+		playbooks（yaml文件）
+		connect plugin
 ```
 
 ## ansible特性：
@@ -41,23 +41,24 @@ ansible-doc -s 查看指定模块的使用说明，比如ansible-doc -s yum
 >部署简单，agentless
 >默认使用SSH协议
 
->主从模式
-```
-master:ansible,ssh client
-slave:ssh server
+>主从模式   
+```     
+	master:ansible,ssh client      
+	slave:ssh server    
+
 ```
 
->支持自定义模块：支持各种编程语言
->支持playbook
->基于“模块”完成各种“任务”
+>支持自定义模块：支持各种编程语言   
+>支持playbook   
+>基于“模块”完成各种“任务”   
 
 
 
 ## ansible安装
->安装
-```
-yum list all *ansible
-yum info ansible
+>安装   
+```   
+	yum list all *ansible    
+	yum info ansible   
 ```
 ### 配置ssh登录环境
 
@@ -68,51 +69,54 @@ yum info ansible
 >-m 指定模块
 >-h 指定主机
 
->安装：
-```
-yum install ansible -y
-rpm -ql ansible
+>安装：   
+```       
+	yum install ansible -y    
+	rpm -ql ansible    
+
 ```
 >重要文件：
 >>主配置文件：`/etc/ansible/ansible.cfg`
 >>远程主机信息文件：`inventory：/etc/ansible/hosts`
 
 >默认登录方式：
-```
+```   
 [web]
 192.168.98.44 ansible_ssh_pass=1 ansible_ssh_user=root
-
+  
 ```
 
 ### 基于密钥登录
 
 ```
-cd /etc/ansible
-vim hosts
-[webserver]
-192.168.98.44
+cd /etc/ansible    
+vim hosts    
+[webserver]   
+192.168.98.44   
+  
 ```
 
 ### 设置密钥：
 ```
-ssh-keygen -t rsa
-ssh-copy-id -i /root/.ssh/名称.pub root@192.168.98.44
+ssh-keygen -t rsa     
+ssh-copy-id -i /root/.ssh/名称.pub root@192.168.98.44   
 ```
 >测试免密登录：`ssh 192.168.98.44`
 
 
 
 ## 常用模块：
->command： 命令模块（默认模块）,用于在远程执行命令；
+>command： 命令模块（默认模块）,用于在远程执行命令；   
 >>例：ansible all -a 'date'；
 
 >cron：
+```    
+     state:状态     
+	present：安装   
+	absent：移除  
+    
 ```
-     state:状态
-	present：安装
-	absent：移除
-```
->>例：让远程主机每10分钟执行一次“输出hello world”；
+>>例：让远程主机每10分钟执行一次“输出hello world”；  
 
 `ansible 192.168.98.44 -m cron -a 'minute="*/10" job="/bin/echo hello" name="test cron job"'`
 
@@ -131,9 +135,9 @@ ssh-copy-id -i /root/.ssh/名称.pub root@192.168.98.44
 
 ### copy：复制模块:
 ```
-	src:指定本地源文件路径；
-	dest：指定远程目标文件复制路径；
-	content：取代src参数，指定源文件内容；
+	src:指定本地源文件路径；    
+	dest：指定远程目标文件复制路径；   
+	content：取代src参数，指定源文件内容；   
 ```
 >>例：
 ```
@@ -148,10 +152,10 @@ ssh-copy-id -i /root/.ssh/名称.pub root@192.168.98.44
 ```
 path：指定文件路径;
 	
-创建链接文件：
-	state=link：创建链接文件；
-	src=指明源文件；
-	path：指明链接文件路径；
+创建链接文件：   
+	state=link：创建链接文件；   
+	src=指明源文件；   
+	path：指明链接文件路径；   
 
 ```
 
@@ -194,7 +198,7 @@ path：指定文件路径;
 
 ### script 脚本模块；
 
->注意：基于相对路径方式使用；
+>注意：基于相对路径方式使用；   
 >创建一个本地脚本:
 ```
 	vim /tmp/test.sh
@@ -288,7 +292,7 @@ path：指定文件路径;
 
 ```
 
-> 剧本:
+> 剧本:   
 ```
 ---
 - hosts: webs
@@ -315,9 +319,9 @@ path：指定文件路径;
 ```
 
 ### 案例二
->为服务器组web的组内主机安装httpd，并启动httpd，加入开机自启
->为服务器组db的组内主机新建系统管理员dbadmin
->剧本：
+>为服务器组web的组内主机安装httpd，并启动httpd，加入开机自启   
+>为服务器组db的组内主机新建系统管理员dbadmin   
+>剧本：   
 ```
 	- hosts: web
 	  tasks:
@@ -379,12 +383,12 @@ ssh-copy-id -i aa@db01
 
 ### 在清单定义变量
 
->案例：
->>为web组主机修改http端口为8080
->>为db组主机修改http端口为888
->>使用template模块：
->>template：在复制文件过程中，该文件可以使用变量
->>区别copy：不能使用变量
+>案例：   
+>>为web组主机修改http端口为8080   
+>>为db组主机修改http端口为888   
+>>使用template模块：   
+>>template：在复制文件过程中，该文件可以使用变量   
+>>区别copy：不能使用变量   
 
 >>template文件为jinja2文件，命名一般为*.j2:`vim httpd.conf.j2`
 
@@ -563,15 +567,15 @@ register：自定义（注册变量）
 ### 角色功能的使用：
 
 >案例：
->>按要求使用template模块修改以下主机http端口，并实现访问
-* 1.安装http,并修改web01的http端口为8080
-* 2.安装http,并修改db01的http端口为888
-* 3.在防火墙开启的状态下，能够访问http://web01:8080
-* 4.在防火墙开启的状态下，能够访问http://db01:888
+>>按要求使用template模块修改以下主机http端口，并实现访问   
+* 1.安装http,并修改web01的http端口为8080   
+* 2.安装http,并修改db01的http端口为888   
+* 3.在防火墙开启的状态下，能够访问http://web01:8080   
+* 4.在防火墙开启的状态下，能够访问http://db01:888   
 
->> 制作httpd.conf.j2模板文件
-* 1.修改Listen {{ http_port }}
-* 2.将httpd.conf.j2 拷贝到 roles/web/templates目录
+>> 制作httpd.conf.j2模板文件   
+* 1.修改Listen {{ http_port }}   
+* 2.将httpd.conf.j2 拷贝到 roles/web/templates目录   
 `cp httpd.conf.j2 roles/web/templates`
 
 
@@ -659,3 +663,175 @@ register：自定义（注册变量）
 	    - db
 
 ```
+
+## playbook项目
+
+### 背景
+>现公司采购了50台服务器，为国庆阅兵提供全国的网络直播服务全局要求如下：
+* 1.所有服务器不允许管理员远程登录，只开放普通用户aa   
+* 2.所有服务器需要关闭selinux   
+* 3.web服务器和db服务器系统为CentOS，其余的为ubuntu   
+* 4.为30台服务器安装httpd服务，httpd服务端口为1001。http服务需要加入开机自启   
+* 5.为10台服务器安装mariadb-server，需要加入开机自启   
+* 6.防火墙配置：   
+	web服务器放行httpd服务   
+	db服务放行mysql服务   
+* 7.为所有服务器安装vim   
+* 8.剧本需要被加密   
+
+
+### 准备工作：
+> 编写好local.repo源文件，并放至ansible工作目录
+```
+	vi /home/leon/my-ansible/local.repo
+	[local]
+	name=local
+	baseurl=file:///mnt
+	enable=1
+	gpgcheck=0
+
+```
+
+>编写好ansible.cfg配置文件，如特权升级等
+```
+	[defaults]
+	inventory=./inventory
+	remote_user=aa
+	
+	[privilege_escalation]
+	become=True
+	become_method=sudo
+	become_user=root
+	become_ask_pass=False
+```
+
+>编写好清单，如建组，相关升级用户及密码变量等
+```
+	[web]
+	192.168.43.100 ansible_become_method='su' ansible_become_user='root' ansible_become_pass='1'
+	[db]
+	192.168.43.110 ansible_become_method='su' ansible_become_user='root' ansible_become_pass='1'
+```
+
+>编写剧本：
+```
+	- hosts: all
+	  gather_facts: no
+	  tasks:
+	    - name: diasble selinux for all server
+	      lineinfile:
+	        dest: /etc/sysconfig/selinux
+	        regexp: '^SELINUX'
+	        line: 'SELINUX=disabled'
+	      tags: a1
+	    - name: display all file in /etc/yum.repos.d
+	      shell: ls /etc/yum.repos.d
+	      register: yumrepo
+	      tags: a2
+	    - name: delete all files in /etc/yum.repos.d
+	      file:
+	        path: /etc/yum.repos.d/{{ item }}
+	        state: absent
+	      with_items:
+	        - "{{ yumrepo.stdout_lines }}"
+	      tags: a3
+	    - name: copy repo file to all server
+	      copy:
+	        src: local.repo
+	        dest: /etc/yum.repos.d
+	      tags: a4
+	    - name: mount cdrom for all server
+	      mount:
+	        fstype: iso9660
+	        src: /dev/cdrom
+	        path: /mnt
+	        state: mounted
+	      tags: a5
+	    - name: modify file line in /etc/fstab
+	      lineinfile:
+	        path: /etc/fstab
+	        line: /dev/cdrom /mnt iso9660 defaults 0 0
+	      tags: a6
+	    - name: install vim for all server
+	      yum:
+	        name: vim
+	        state: latest
+	      tags: a7
+	
+	- hosts: web
+	  gather_facts: no
+	  tasks:
+	    - name: install httpd for web server
+	      yum:
+	        name: httpd
+	      tags: b1
+	    - name: start httpd and enabled
+	      service:
+	        name: httpd
+	        state: started
+	        enabled: true
+	      tags: b2
+	    - name: update httpd.conf to all web server
+	      copy:
+	        src: httpd.conf
+	        dest: /etc/httpd/conf/httpd.conf
+	      notify: restart httpd
+	      tags: b3
+	    - name: start firewalld
+	      service:
+	        name: firewalld
+	        state: started
+	        enabled: true
+	      tags: b4
+	    - name: setting firewalld for http service
+	      firewalld:
+	        service: http
+	        permanent: true
+	        immediate: true
+	        state: enabled
+	      tags: b5
+	
+	  handlers:
+	    - name: restart httpd
+	      service:
+	        name: httpd
+	        state: restarted
+	      tags: b4
+	
+	- hosts: db
+	  gather_facts: no
+	  tasks:
+	    - name: install mariadb for db servers
+	      yum:
+	        name: mariadb-server
+	      tags: c1
+	    - name: start and enable mariadb
+	      service:
+	        name: mariadb
+	        enabled: true
+	      tags: c2
+	    - name: start firewalld
+	      service:
+	        name: firewalld
+	        state: started
+	        enabled: true
+	      tags: c3
+	    - name: setting firewalld for mysql service
+	      firewalld:
+	        service: mysql
+	        permanent: true
+	        immediate: true
+	        state: enabled
+	      tags: c4
+
+```
+
+
+
+
+
+          
+
+
+
+
